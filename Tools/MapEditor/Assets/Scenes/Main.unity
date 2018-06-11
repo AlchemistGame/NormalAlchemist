@@ -477,7 +477,7 @@ MonoBehaviour:
   originalBtn: {fileID: 785198514}
   cameraMoveSpeed: 0.02
   cameraScaleSpeed: 0.2
-  cameraRotateSpeed: 0.8
+  cameraRotateSpeed: 8
 --- !u!1 &282840810
 GameObject:
   m_ObjectHideFlags: 0
@@ -518,7 +518,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: 0.3
+  near clip plane: 0.01
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -544,13 +544,13 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 282840810}
-  m_LocalRotation: {x: -0.0004722131, y: 0.99939156, z: -0.03149126, w: -0.014985952}
-  m_LocalPosition: {x: 0.022053562, y: 0.118885435, z: 0.7348976}
+  m_LocalRotation: {x: 0.027376918, y: -0.70197, z: 0.026924826, w: 0.7111707}
+  m_LocalPosition: {x: 0.7344557, y: 5.059038, z: -0.009560276}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 3.6100001, y: -180, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &288316975
 Prefab:
   m_ObjectHideFlags: 0
@@ -564,7 +564,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 428428, guid: d4a942ff47530ff428fda4e6b2473eae, type: 2}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 4.93
       objectReference: {fileID: 0}
     - target: {fileID: 428428, guid: d4a942ff47530ff428fda4e6b2473eae, type: 2}
       propertyPath: m_LocalPosition.z
