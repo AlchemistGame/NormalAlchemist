@@ -14,7 +14,6 @@ public class MapManager : MonoBehaviour
         Remove,
     }
     private EditorMode currentMode = EditorMode.Add;
-    private const float addDistance = 10.0f;
 
     private void Awake()
     {
@@ -31,32 +30,34 @@ public class MapManager : MonoBehaviour
     void Update()
     {
         Ray ray = currentCamera.ScreenPointToRay(Input.mousePosition);
-
-        switch (currentMode)
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit))
         {
-            case EditorMode.Add:
-                Vector3 targetPos = ray.GetPoint(addDistance);
-                Vector3 alignedPosition = new Vector3(Mathf.Floor(targetPos.x / MapData.gridEdge) * MapData.gridEdge + MapData.gridEdge / 2.0f,
-                    Mathf.Floor(targetPos.y / MapData.gridEdge) * MapData.gridEdge + MapData.gridEdge / 2.0f,
-                    Mathf.Floor(targetPos.z / MapData.gridEdge) * MapData.gridEdge + MapData.gridEdge / 2.0f);
+            switch (currentMode)
+            {
+                case EditorMode.Add:
+                    Vector3 targetPos = hit.point;
+                    int gridX = Mathf.FloorToInt(targetPos.x / MapData.gridEdge) + 1;
+                    int gridY = Mathf.FloorToInt(targetPos.y / MapData.gridEdge) + 1;
+                    int gridZ = Mathf.FloorToInt(targetPos.z / MapData.gridEdge) + 1;
 
-                indicationObject.transform.position = alignedPosition;
-                indicationObject.SetActive(true);
-                break;
-            case EditorMode.Remove:
-                indicationObject.SetActive(false);
+                    Vector3 alignedPosition = new Vector3(gridX * MapData.gridEdge,
+                         gridY * MapData.gridEdge,
+                         gridZ * MapData.gridEdge);
 
-                RaycastHit hit;
-                if (Physics.Raycast(ray, out hit))
-                {
-                    Transform selectTrans = hit.transform;
+                    indicationObject.transform.position = alignedPosition;
+                    indicationObject.SetActive(true);
+                    break;
+                case EditorMode.Remove:
+                    indicationObject.SetActive(false);
 
-                    Debug.Log(selectTrans.name);
-                }
-                break;
-            default:
-                break;
+
+                    break;
+                default:
+                    break;
+            }
         }
+        
 
         // E键进入添加模式
         if (Input.GetKeyDown(KeyCode.E))
