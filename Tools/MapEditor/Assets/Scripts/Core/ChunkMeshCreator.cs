@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 // Handles mesh creation and all related functions.
 
-namespace Uniblocks {
+namespace VoxelFramework {
 
 public enum MeshRotation {
 	none, back, left, right

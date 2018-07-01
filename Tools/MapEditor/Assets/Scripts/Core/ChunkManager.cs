@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 // Controls spawning and destroying chunks.
 
-namespace Uniblocks {
+namespace VoxelFramework {
 
 public class ChunkManager : MonoBehaviour {
 		

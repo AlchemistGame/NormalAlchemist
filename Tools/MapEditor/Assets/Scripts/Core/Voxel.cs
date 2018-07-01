@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-namespace Uniblocks
+namespace VoxelFramework
 {
 
     public class Voxel : MonoBehaviour

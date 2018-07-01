@@ -3,7 +3,7 @@ using System.Collections;
 
 // inherit from this class if you don't want to use the default events
 
-namespace Uniblocks {
+namespace VoxelFramework {
 
 public class VoxelEvents : MonoBehaviour {
 

@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Uniblocks {
+namespace VoxelFramework {
 
 public class Chunk : MonoBehaviour {
 	
