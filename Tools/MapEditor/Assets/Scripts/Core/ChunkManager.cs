@@ -1,5 +1,3 @@
-
-
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
@@ -148,22 +146,6 @@ public class ChunkManager : MonoBehaviour {
 		else return chunk;
 	}
 	
-	public static GameObject SpawnChunkFromServer ( Index index ) { // spawns a chunk and disables mesh generation and enables timeout (used by the server in multiplayer)
-		GameObject chunk = ChunkManager.GetChunk (index);
-		if (chunk == null) {
-			chunk = Engine.ChunkManagerInstance.DoSpawnChunk(index);
-			Chunk chunkComponent =chunk.GetComponent<Chunk>();
-			chunkComponent.EnableTimeout = true;
-			chunkComponent.DisableMesh = true;
-			return chunk;
-		}
-		else return chunk; // don't disable mesh generation and don't enable timeout for chunks that are already spawned
-	}
-	
-	public static GameObject SpawnChunkFromServer ( int x, int y, int z ) {
-		return SpawnChunkFromServer (new Index(x,y,z));
-	}
-	
 	GameObject DoSpawnChunk (Index index) {
 		GameObject chunkObject = Instantiate(ChunkObject, index.ToVector3(), transform.rotation) as GameObject;
 		Chunk chunk = chunkObject.GetComponent<Chunk>();
@@ -273,13 +255,6 @@ public class ChunkManager : MonoBehaviour {
 						
 						// chunks that already exist but haven't had their mesh built yet should be added to the update queue
 						if (currentChunk != null) {
-							
-							// chunks without meshes spawned by server should be changed to regular chunks
-							if (currentChunk.DisableMesh || currentChunk.EnableTimeout) {
-								currentChunk.DisableMesh = false;
-								currentChunk.EnableTimeout = false;
-								currentChunk.Fresh = true;
-							}
 							
 							if (currentChunk.Fresh) {
 							

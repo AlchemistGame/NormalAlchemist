@@ -3,14 +3,13 @@ using System.Collections;
 
 namespace VoxelFramework
 {
-
     /// <summary>
     /// 用于在新建地图时初始化一大块平地
     /// </summary>
     public class TerrainGenerator : MonoBehaviour
     {
 
-        protected Chunk chunk;
+        private Chunk chunk;
 
         public void InitializeGenerator()
         {
@@ -35,10 +34,30 @@ namespace VoxelFramework
             chunk.VoxelsDone = true;
         }
 
-        public virtual void GenerateVoxelData()
+        public void GenerateVoxelData()
         {
+            int chunky = chunk.ChunkIndex.y;
+            // 只有最底一层的 chunk 初始化一个平台
+            if (chunky > 0)
+            {
+                return;
+            }
 
+            int SideLength = Engine.ChunkSideLength;
+
+            // for all voxels in the chunk
+            for (int x = 0; x < SideLength; x++)
+            {
+                for (int z = 0; z < SideLength; z++)
+                {
+                    // dirt pass
+                    chunk.SetVoxelSimple(x, 0, z, 1); // set dirt
+
+                    // grass pass
+                    chunk.SetVoxelSimple(x, 1, z, 2);   // set grass
+                }
+            }
         }
-    }
 
+    }
 }

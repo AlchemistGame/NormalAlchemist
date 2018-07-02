@@ -13,11 +13,9 @@ public class Chunk : MonoBehaviour {
 	public bool Empty;
 	
 	// Settings & flags
-	public bool Fresh = true; 
-	public bool EnableTimeout;
+	public bool Fresh = true;
 	public bool DisableMesh; // for chunks spawned from UniblocksServer; if true, the chunk will not build a mesh
 	private bool FlaggedToRemove;
-	public float Lifetime; // how long since the chunk has been spawned
 	
 	// update queue
 	public bool	FlaggedToUpdate,
@@ -243,16 +241,8 @@ public class Chunk : MonoBehaviour {
 		ChunkManager.SavesThisFrame = 0;
 	}
 	
-	public void LateUpdate () {
-	
-		// timeout
-		if (Engine.EnableChunkTimeout && EnableTimeout) {
-			Lifetime += Time.deltaTime;
-			if (Lifetime > Engine.ChunkTimeout) {
-				FlaggedToRemove = true;
-			}
-		}
-	
+	public void LateUpdate ()
+    {
 		if (FlaggedToUpdate && VoxelsDone && !DisableMesh && Engine.GenerateMeshes) { // check if we should update the mesh
 			FlaggedToUpdate = false;
 			RebuildMesh();	

@@ -39,7 +39,9 @@ namespace VoxelFramework
         public GameObject[] lBlocks;
 
         // chunk spawn settings
-        public static int HeightRange, ChunkSpawnDistance, ChunkSideLength, ChunkDespawnDistance;
+        public static int HeightRange, ChunkSpawnDistance, ChunkDespawnDistance;
+        // the length of the side of each chunk (in voxels).
+        public static int ChunkSideLength = 16; // 一个 chunk = 16x16x16 cubes
         public int lHeightRange, lChunkSpawnDistance, lChunkSideLength, lChunkDespawnDistance;
 
         // texture settings
@@ -47,20 +49,16 @@ namespace VoxelFramework
         public float lTextureUnit, lTexturePadding;
 
         // performance settings
-        public static int TargetFPS, MaxChunkSaves, MaxChunkDataRequests;
-        public int lTargetFPS, lMaxChunkSaves, lMaxChunkDataRequests;
+        public static int TargetFPS, MaxChunkSaves;
+        public int lTargetFPS, lMaxChunkSaves;
 
         // global settings	
 
         public static bool ShowBorderFaces, GenerateColliders, SendCameraLookEvents,
-        SendCursorEvents, EnableMultiplayer, MultiplayerTrackPosition, SaveVoxelData, GenerateMeshes;
+        SendCursorEvents, SaveVoxelData, GenerateMeshes;
 
         public bool lShowBorderFaces, lGenerateColliders, lSendCameraLookEvents,
-        lSendCursorEvents, lEnableMultiplayer, lMultiplayerTrackPosition, lSaveVoxelData, lGenerateMeshes;
-
-        public static float ChunkTimeout;
-        public float lChunkTimeout;
-        public static bool EnableChunkTimeout;
+        lSendCursorEvents, lSaveVoxelData, lGenerateMeshes;
 
         // other
         public static int SquaredSideLength;
@@ -77,7 +75,6 @@ namespace VoxelFramework
         // ==== initialization ====
         public void Awake()
         {
-
             Engine.EngineInstance = this;
             Engine.ChunkManagerInstance = GetComponent<ChunkManager>();
 
@@ -89,14 +86,11 @@ namespace VoxelFramework
 
             TargetFPS = lTargetFPS;
             MaxChunkSaves = lMaxChunkSaves;
-            MaxChunkDataRequests = lMaxChunkDataRequests;
 
             TextureUnit = lTextureUnit;
             TexturePadding = lTexturePadding;
             GenerateColliders = lGenerateColliders;
             ShowBorderFaces = lShowBorderFaces;
-            EnableMultiplayer = lEnableMultiplayer;
-            MultiplayerTrackPosition = lMultiplayerTrackPosition;
             SaveVoxelData = lSaveVoxelData;
             GenerateMeshes = lGenerateMeshes;
 
@@ -112,16 +106,6 @@ namespace VoxelFramework
 
             ChunkDataFiles.LoadedRegions = new Dictionary<string, string[]>();
             ChunkDataFiles.TempChunkData = new Dictionary<string, string>();
-
-            if (lChunkTimeout <= 0.00001f)
-            {
-                EnableChunkTimeout = false;
-            }
-            else
-            {
-                EnableChunkTimeout = true;
-                ChunkTimeout = lChunkTimeout;
-            }
 
 
             // set layer
@@ -172,12 +156,6 @@ namespace VoxelFramework
                 Debug.LogWarning("Uniblocks: Chunk height range can't be a negative number! Setting chunk height range to 0.");
             }
 
-            if (Engine.MaxChunkDataRequests < 0)
-            {
-                Engine.MaxChunkDataRequests = 0;
-                Debug.LogWarning("Uniblocks: Max chunk data requests can't be a negative number! Setting max chunk data requests to 0.");
-            }
-
             // check materials
             GameObject chunkPrefab = GetComponent<ChunkManager>().ChunkObject;
             int materialCount = chunkPrefab.GetComponent<Renderer>().sharedMaterials.Length - 1;
@@ -216,10 +194,10 @@ namespace VoxelFramework
 
         // ==== world data ====
 
+        // 存储地图数据的路径
         private static void UpdateWorldPath()
         {
-            WorldPath = Application.dataPath + "/../Worlds/" + Engine.WorldName + "/"; // you can set World Path here
-                                                                                       //WorldPath = "/mnt/sdcard/UniblocksWorlds/" + Engine.WorldName + "/"; // example mobile path for Android
+            WorldPath = Application.dataPath + "/../Worlds/" + Engine.WorldName + "/";
         }
 
         public static void SetWorldName(string worldName)
