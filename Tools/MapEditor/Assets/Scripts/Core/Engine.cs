@@ -20,9 +20,21 @@ namespace VoxelFramework
     {
         solid, semiTransparent, transparent
     }
+    /// <summary>
+    /// 如 Box Collider, Sphere Collider, Capsule Collider 都被称为 primitive collider,
+    /// 将任意个数 primitive collider 添加到同一物体上, 组成一个完整的 compound collider,
+    /// 一个物体的 collider, 通常不需要与 mesh 保持完全相同的形状, 一个粗糙的近似就够用了.
+    /// 只有当 compound collider 不够用时, 才会转用 mesh collider 来完全模拟 mesh 的形状.
+    /// </summary>
     public enum ColliderType
     {
-        cube, mesh, none
+        // 在体素地图里, 一般 1x1x1 的方块加上贴图就行了
+        cube,
+        // 特殊情况下可能需要特殊的 mesh 来代替默认 block
+        mesh,
+        // 生成一个 cube Trigger( 一种特殊的 collider ), 仍能监测到其他 collider enters its space 的情况, 并触发脚本里的 OnTriggerEnter 事件,
+        // 但不会产生物理层面的碰撞
+        none, 
     }
 
 
