@@ -384,17 +384,19 @@ namespace VoxelFramework
             Voxel voxelType = Engine.GetVoxelType(voxel);
             Vector2[] textureArray = voxelType.VTexture;
 
+            // in case there are no textures defined, return a default texture
             if (textureArray.Length == 0)
-            { // in case there are no textures defined, return a default texture
+            {
                 Debug.LogWarning("Uniblocks: Block " + voxel.ToString() + " has no defined textures! Using default texture.");
                 return new Vector2(0, 0);
             }
             else if (voxelType.VCustomSides == false)
-            { // if this voxel isn't using custom side textures, return the Up texture.
+            {
                 return textureArray[0];
             }
+            // if we're asking for a texture that's not defined, grab the last defined texture instead
             else if ((int)facing > textureArray.Length - 1)
-            { // if we're asking for a texture that's not defined, grab the last defined texture instead
+            {
                 return textureArray[textureArray.Length - 1];
             }
             else

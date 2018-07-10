@@ -6,7 +6,6 @@ using UnityEngine.UI;
 public class NewMapPanel : MonoBehaviour
 {
     public Button closeBtn;
-    public Dropdown mapSizeDropdown;
     public Button finishBtn;
 
     private void Start()
@@ -16,14 +15,6 @@ public class NewMapPanel : MonoBehaviour
             this.gameObject.SetActive(false);
             Destroy(gameObject);
         });
-
-        List<string> mapSizeDropOptions = new List<string>
-        {
-            "100x100x100",
-            "500x500x500",
-        };
-        mapSizeDropdown.ClearOptions();
-        mapSizeDropdown.AddOptions(mapSizeDropOptions);
 
         finishBtn.onClick.AddListener(CreateMap);
     }

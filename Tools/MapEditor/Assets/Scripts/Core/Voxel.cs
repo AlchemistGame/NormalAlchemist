@@ -10,7 +10,12 @@ namespace VoxelFramework
         public string VName;
         public Mesh VMesh;
         public bool VCustomMesh;
+
+        /// <summary>
+        /// 此方块是否给每一面都指定了一张纹理, false-此方块的六个面用的同一张纹理-VTexture.Length==1
+        /// </summary>
         public bool VCustomSides;
+        
         public Vector2[] VTexture; // index of the texture. Array index specifies face (VTexture[0] is the up-facing texture, for example)
         public Transparency VTransparency;
         public ColliderType VColliderType;
