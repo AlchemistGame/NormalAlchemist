@@ -15,8 +15,15 @@ namespace VoxelFramework
         /// 此方块是否给每一面都指定了一张纹理, false-此方块的六个面用的同一张纹理-VTexture.Length==1
         /// </summary>
         public bool VCustomSides;
-        
-        public Vector2[] VTexture; // index of the texture. Array index specifies face (VTexture[0] is the up-facing texture, for example)
+
+        /// <summary>
+        /// Vector2: texture sheet 中的坐标
+        /// 以 block 的一个面大小为单位( 而非像素 )
+        /// 从左下角开始计算, 如 (0, 0) 表示左下角第一个方块面
+        /// 数组索引对应这个体素方块的各个面, 如 VTexture[0] is the up-facing texture
+        /// </summary>
+        public Vector2[] VTexture;
+
         public Transparency VTransparency;
         public ColliderType VColliderType;
         public int VSubmeshIndex;

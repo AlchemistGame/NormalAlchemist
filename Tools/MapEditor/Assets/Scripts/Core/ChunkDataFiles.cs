@@ -44,9 +44,9 @@ namespace VoxelFramework
             WriteChunkData(chunk.ChunkIndex, compressedData);
         }
 
+        // decompresses voxel data and loads it into the VoxelData array
         public static void DecompressData(Chunk chunk, string data)
-        { // decompresses voxel data and loads it into the VoxelData array
-
+        {
             // check if chunk is empty
             if (data.Length == 2 && data[1] == (char)0)
             {

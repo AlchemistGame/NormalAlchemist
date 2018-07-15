@@ -36,12 +36,12 @@ namespace VoxelFramework
 
         public void GenerateVoxelData()
         {
-            int chunky = chunk.ChunkIndex.y;
+            //int chunky = chunk.ChunkIndex.y;
             // 只有最底一层的 chunk 初始化一个平台
-            if (chunky > 0)
-            {
-                return;
-            }
+            //if (chunky > 0)
+            //{
+            //    return;
+            //}
 
             int SideLength = Engine.ChunkSideLength;
 
@@ -50,11 +50,8 @@ namespace VoxelFramework
             {
                 for (int z = 0; z < SideLength; z++)
                 {
-                    // dirt pass
-                    chunk.SetVoxelSimple(x, 0, z, 1); // set dirt
-
-                    // grass pass
-                    chunk.SetVoxelSimple(x, 1, z, 2);   // set grass
+                    // 铺一层方块
+                    chunk.SetVoxelSimple(x, 0, z, 1);
                 }
             }
         }

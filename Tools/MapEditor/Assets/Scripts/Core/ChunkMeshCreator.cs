@@ -19,6 +19,9 @@ namespace VoxelFramework
         private int SideLength;
         private GameObject noCollideCollider;
 
+        /// <summary>
+        /// 提供 Cube 顶点数和面数的依据
+        /// </summary>
         public Mesh Cube;
 
         // variables for storing the mesh data
@@ -52,9 +55,8 @@ namespace VoxelFramework
             initialized = true;
         }
 
+
         // ==== Voxel updates =====================================================================================
-
-
 
         public void RebuildMesh()
         {
@@ -82,7 +84,8 @@ namespace VoxelFramework
                 {
                     while (z < SideLength)
                     {
-                        ushort voxel = chunk.GetVoxel(x, y, z); // the current voxel data
+                        ushort voxel = chunk.GetVoxel(x, y, z);
+
                         // don't render empty blocks.
                         if (voxel != 0)
                         {
@@ -137,7 +140,6 @@ namespace VoxelFramework
                 x += 1;
             }
 
-            // update mesh using the values from the arrays
             UpdateMesh(GetComponent<MeshFilter>().mesh);
         }
 
@@ -490,6 +492,10 @@ namespace VoxelFramework
             }
         }
 
+        /// <summary>
+        /// 将构建好的 Mesh 赋给指定 chunk
+        /// </summary>
+        /// <param name="mesh"></param>
         private void UpdateMesh(Mesh mesh)
         {
             // Update the mesh

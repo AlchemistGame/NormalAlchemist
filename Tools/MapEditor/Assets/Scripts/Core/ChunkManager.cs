@@ -65,9 +65,9 @@ namespace VoxelFramework
             }
         }
 
+        // called from the SpawnChunks loop to update chunk meshes
         private void ProcessChunkQueue()
-        { // called from the SpawnChunks loop to update chunk meshes
-
+        {
             // update the first chunk and remove it from the queue
             Chunk currentChunk = ChunkUpdateQueue[0];
 
@@ -189,10 +189,12 @@ namespace VoxelFramework
             Engine.ChunkManagerInstance.TrySpawnChunks(index);
         }
 
+        // take chunk index, no conversion needed
         public static void SpawnChunks(int x, int y, int z)
-        { // take chunk index, no conversion needed
+        {
             Engine.ChunkManagerInstance.TrySpawnChunks(x, y, z);
         }
+
         public static void SpawnChunks(Index index)
         {
             Engine.ChunkManagerInstance.TrySpawnChunks(index.x, index.y, index.z);
@@ -202,15 +204,17 @@ namespace VoxelFramework
         {
             TrySpawnChunks(index.x, index.y, index.z);
         }
+
         private void TrySpawnChunks(int x, int y, int z)
         {
-
+            // if we're not spawning chunks at the moment, just spawn them normally
             if (Done == true)
-            { // if we're not spawning chunks at the moment, just spawn them normally
+            {
                 StartSpawnChunks(x, y, z);
             }
+            // if we are spawning chunks already, flag to spawn again once the previous round is finished using the last requested position as origin.
             else
-            { // if we are spawning chunks already, flag to spawn again once the previous round is finished using the last requested position as origin.
+            {
                 LastRequest = new Index(x, y, z);
                 SpawnQueue = 1;
                 StopSpawning = true;
@@ -240,7 +244,6 @@ namespace VoxelFramework
 
         private void StartSpawnChunks(int originX, int originY, int originZ)
         {
-
             ChunkManager.SpawningChunks = true;
             Done = false;
 
@@ -256,7 +259,8 @@ namespace VoxelFramework
 
             int heightRange = Engine.HeightRange;
 
-            ChunkUpdateQueue = new List<Chunk>(); // clear update queue - it will be repopulated again in the correct order in the following loop
+            // clear update queue - it will be repopulated again in the correct order in the following loop
+            ChunkUpdateQueue = new List<Chunk>();
 
             // flag chunks not in range for removal
             ChunksToDestroy = new List<Chunk>();
@@ -266,9 +270,9 @@ namespace VoxelFramework
                 {
                     ChunksToDestroy.Add(chunk);
                 }
-
+                // destroy chunks outside of vertical range
                 else if (Mathf.Abs(chunk.ChunkIndex.y - originY) > range + Engine.ChunkDespawnDistance)
-                { // destroy chunks outside of vertical range
+                {
                     ChunksToDestroy.Add(chunk);
                 }
             }
@@ -283,12 +287,12 @@ namespace VoxelFramework
                     {
                         for (var z = originZ - currentLoop; z <= originZ + currentLoop; z++)
                         {
-
+                            // skip chunks outside of height range
                             if (Mathf.Abs(y) <= heightRange)
-                            { // skip chunks outside of height range
+                            {
+                                // skip corners
                                 if (Mathf.Abs(originX - x) + Mathf.Abs(originZ - z) < range * 1.3f)
-                                { // skip corners
-
+                                {
                                     // pause loop while the queue is not empty
                                     while (ChunkUpdateQueue.Count > 0)
                                     {
@@ -305,10 +309,8 @@ namespace VoxelFramework
                                     // chunks that already exist but haven't had their mesh built yet should be added to the update queue
                                     if (currentChunk != null)
                                     {
-
                                         if (currentChunk.Fresh)
                                         {
-
                                             // spawn neighbor chunks
                                             for (int d = 0; d < 6; d++)
                                             {
@@ -335,13 +337,10 @@ namespace VoxelFramework
                                             if (currentChunk != null)
                                                 currentChunk.AddToQueueWhenReady();
                                         }
-
-
                                     }
-
+                                    // if chunk doesn't exist, create new chunk (it adds itself to the update queue when its data is ready)
                                     else
-                                    { // if chunk doesn't exist, create new chunk (it adds itself to the update queue when its data is ready)
-
+                                    {
                                         // spawn chunk
                                         GameObject newChunk = Instantiate(ChunkObject, new Vector3(x, y, z), transform.rotation) as GameObject; // Spawn a new chunk.
                                         currentChunk = newChunk.GetComponent<Chunk>();
@@ -371,16 +370,13 @@ namespace VoxelFramework
 
                                         if (currentChunk != null)
                                             currentChunk.AddToQueueWhenReady();
-
-
-
+                                        
                                     }
 
                                 }
                             }
 
-
-
+                            
                             // continue loop in next frame if the current frame time is exceeded
                             if (frameStopwatch.Elapsed.TotalSeconds >= targetFrameDuration)
                             {

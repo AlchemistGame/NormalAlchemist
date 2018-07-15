@@ -7,11 +7,18 @@ namespace VoxelFramework
 
     public class Chunk : MonoBehaviour
     {
+        /// <summary>
+        /// 0 - empty block( 空的方块 )
+        /// </summary>
+        public ushort[] VoxelData;
 
-        // Chunk data
-        public ushort[] VoxelData; // main voxel data array
         public Index ChunkIndex; // corresponds to the position of the chunk
         public Chunk[] NeighborChunks; // references to GameObjects of neighbor chunks
+
+        /// <summary>
+        /// 这个 chunk 是不是空的( 没有创建任何方块 )
+        /// 设为 true 时将不参与 mesh 的重建
+        /// </summary>
         public bool Empty;
 
         // Settings & flags
@@ -135,7 +142,7 @@ namespace VoxelFramework
         }
 
 
-        // == set voxel
+        // ushort data 表示 Engine 类 Blocks 列表中的 index
         public void SetVoxelSimple(int rawIndex, ushort data)
         {
             VoxelData[rawIndex] = data;
@@ -196,7 +203,7 @@ namespace VoxelFramework
             SetVoxel(index.x, index.y, index.z, data, updateMesh);
         }
 
-        // == get voxel
+        // 获取 chunk 中指定体素方块的数据
         public ushort GetVoxelSimple(int rawIndex)
         {
             return VoxelData[rawIndex];
@@ -211,7 +218,6 @@ namespace VoxelFramework
         }
         public ushort GetVoxel(int x, int y, int z)
         {
-
             if (x < 0)
             {
                 if (NeighborChunks[(int)Direction.left] != null)
@@ -292,8 +298,9 @@ namespace VoxelFramework
 
         public void LateUpdate()
         {
-            if (FlaggedToUpdate && VoxelsDone && !DisableMesh && Engine.GenerateMeshes)
-            { // check if we should update the mesh
+            // check if we should update the mesh
+            if (FlaggedToUpdate && VoxelsDone && !DisableMesh)
+            {
                 FlaggedToUpdate = false;
                 RebuildMesh();
             }

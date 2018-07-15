@@ -42,39 +42,59 @@ namespace VoxelFramework
     {
 
         // file paths
-        public static string WorldName, WorldPath, BlocksPath;
+        public static string WorldName, WorldPath;
         public string lWorldName = "TestWorld";
-        public string lBlocksPath;
 
         // voxels
         public static GameObject[] Blocks;
         public GameObject[] lBlocks;
 
-        // chunk spawn settings
-        public static int HeightRange, ChunkSpawnDistance, ChunkDespawnDistance;
-        // the length of the side of each chunk (in voxels).
-        public static int ChunkSideLength = 16; // 一个 chunk = 16x16x16 cubes
+        /// <summary>
+        /// The maximum positive and negative vertical chunk index of spawned chunks.
+        /// 此值以 chunk index 为单位, 如值为 3 表示在 Y 坐标方向, 生成的 chunk 肯定在 [-3, 3] 之间
+        /// </summary>
+        public static int HeightRange;
+
+        /// <summary>
+        /// 围绕 spawn point, 以 ChunkSpawnDistance 为半径, 生成 terrain chunks
+        /// 此值以 chunk 为单位, 如值为 7 表示从 origin point 沿 4 个水平方向各生成 7 个 chunk
+        /// </summary>
+        public static int ChunkSpawnDistance;
+
+        /// <summary>
+        /// 当之前已生成的一个 chunk 距离 origin point 超过 (ChunkSpawnDistance + AdditionalDespawnDistance)
+        /// 就销毁这个 chunk( 只是销毁场景里的 mesh, 该 chunk 的数据会保留下来 )
+        /// </summary>
+        public static int ChunkDespawnDistance;
+
+        /// <summary>
+        /// the length of the side of each chunk (in voxels).
+        /// 如值为 8 表示 1 chunk = 8x8x8 cubes
+        /// </summary>
+        public static int ChunkSideLength;
         public int lHeightRange, lChunkSpawnDistance, lChunkSideLength, lChunkDespawnDistance;
 
-        // texture settings
-        public static float TextureUnit, TexturePadding;
+        /// <summary>
+        /// 现在 chunk 所用的材质上, texture 大小为 512x512, 里面按 blocks 划分为 8x8
+        /// 一个 block 单元占整张 texture 的比例为 1/8=0.125
+        /// </summary>
+        public static float TextureUnit;
+        public static float TexturePadding;
         public float lTextureUnit, lTexturePadding;
 
         // performance settings
         public static int TargetFPS, MaxChunkSaves;
         public int lTargetFPS, lMaxChunkSaves;
 
-        // global settings	
-
+        // global settings
         public static bool ShowBorderFaces, GenerateColliders, SendCameraLookEvents,
-        SendCursorEvents, SaveVoxelData, GenerateMeshes;
+        SendCursorEvents, SaveVoxelData;
 
         public bool lShowBorderFaces, lGenerateColliders, lSendCameraLookEvents,
-        lSendCursorEvents, lSaveVoxelData, lGenerateMeshes;
+        lSendCursorEvents, lSaveVoxelData;
 
         // other
         public static int SquaredSideLength;
-        public static GameObject UniblocksNetwork;
         public static Engine EngineInstance;
         public static ChunkManager ChunkManagerInstance;
 
@@ -92,8 +112,7 @@ namespace VoxelFramework
 
             WorldName = lWorldName;
             UpdateWorldPath();
-
-            BlocksPath = lBlocksPath;
+            
             Engine.Blocks = lBlocks;
 
             TargetFPS = lTargetFPS;
@@ -104,7 +123,6 @@ namespace VoxelFramework
             GenerateColliders = lGenerateColliders;
             ShowBorderFaces = lShowBorderFaces;
             SaveVoxelData = lSaveVoxelData;
-            GenerateMeshes = lGenerateMeshes;
 
             ChunkSpawnDistance = lChunkSpawnDistance;
             HeightRange = lHeightRange;
@@ -377,10 +395,8 @@ namespace VoxelFramework
 
 
         // ==== mesh creator ====
-
         public static Vector2 GetTextureOffset(ushort voxel, Facing facing)
         {
-
             Voxel voxelType = Engine.GetVoxelType(voxel);
             Vector2[] textureArray = voxelType.VTexture;
 
