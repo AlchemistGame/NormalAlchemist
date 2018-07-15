@@ -57,7 +57,7 @@ namespace VoxelFramework
 
         /// <summary>
         /// 围绕 spawn point, 以 ChunkSpawnDistance 为半径, 生成 terrain chunks
-        /// 此值以 chunk 为单位, 如值为 7 表示从 origin point 沿 4 个水平方向各生成 7 个 chunk
+        /// 此值以 chunk 为单位, 如值为 7 表示在以 origin point 为中心, 2x7 chunks 为边长的立方体范围内生成 chunk( Y 方向上受到 HeightRange 的限制 )
         /// </summary>
         public static int ChunkSpawnDistance;
 

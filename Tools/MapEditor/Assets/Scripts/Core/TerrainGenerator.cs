@@ -34,14 +34,19 @@ namespace VoxelFramework
             chunk.VoxelsDone = true;
         }
 
+        /// <summary>
+        /// ChunkIndex.y 有正负之分, [-HeightRange, HeightRange]
+        /// 而一个 chunk 内的方块坐标, 都是从 0 起步向上
+        /// </summary>
         public void GenerateVoxelData()
         {
-            //int chunky = chunk.ChunkIndex.y;
             // 只有最底一层的 chunk 初始化一个平台
-            //if (chunky > 0)
-            //{
-            //    return;
-            //}
+            int chunky = chunk.ChunkIndex.y;
+            int lowestY = -Engine.HeightRange;
+            if (chunky > lowestY)
+            {
+                return;
+            }
 
             int SideLength = Engine.ChunkSideLength;
 

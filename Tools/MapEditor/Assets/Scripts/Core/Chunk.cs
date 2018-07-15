@@ -9,6 +9,8 @@ namespace VoxelFramework
     {
         /// <summary>
         /// 0 - empty block( ¿ÕµÄ·½¿é )
+        /// 1 - grass block
+        /// ...
         /// </summary>
         public ushort[] VoxelData;
 
