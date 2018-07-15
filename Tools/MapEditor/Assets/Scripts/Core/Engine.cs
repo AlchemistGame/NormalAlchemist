@@ -87,11 +87,8 @@ namespace VoxelFramework
         public int lTargetFPS, lMaxChunkSaves;
 
         // global settings
-        public static bool ShowBorderFaces, GenerateColliders, SendCameraLookEvents,
-        SendCursorEvents, SaveVoxelData;
-
-        public bool lShowBorderFaces, lGenerateColliders, lSendCameraLookEvents,
-        lSendCursorEvents, lSaveVoxelData;
+        public static bool ShowBorderFaces, GenerateColliders, SaveVoxelData;
+        public bool lShowBorderFaces, lGenerateColliders, lSaveVoxelData;
 
         // other
         public static int SquaredSideLength;
@@ -127,9 +124,6 @@ namespace VoxelFramework
             ChunkSpawnDistance = lChunkSpawnDistance;
             HeightRange = lHeightRange;
             ChunkDespawnDistance = lChunkDespawnDistance;
-
-            SendCameraLookEvents = lSendCameraLookEvents;
-            SendCursorEvents = lSendCursorEvents;
 
             ChunkSideLength = lChunkSideLength;
             SquaredSideLength = lChunkSideLength * lChunkSideLength;
@@ -344,7 +338,13 @@ namespace VoxelFramework
             // else 
             return null;
         }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="ray"></param>
+        /// <param name="range"></param>
+        /// <param name="ignoreTransparent">是否可以检测到透明, 半透明的东西</param>
+        /// <returns></returns>
         public static VoxelInfo VoxelRaycast(Ray ray, float range, bool ignoreTransparent)
         {
             return Engine.VoxelRaycast(ray.origin, ray.direction, range, ignoreTransparent);

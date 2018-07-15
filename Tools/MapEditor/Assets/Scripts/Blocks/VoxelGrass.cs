@@ -3,13 +3,10 @@ using System.Collections;
 
 namespace VoxelFramework
 {
-
     public class VoxelGrass : DefaultVoxelEvents
     {
-
         public override void OnBlockPlace(VoxelInfo voxelInfo)
         {
-
             // switch to dirt if the block above isn't 0
             Index adjacentIndex = voxelInfo.chunk.GetAdjacentIndex(voxelInfo.index, Direction.up);
             if (voxelInfo.chunk.GetVoxel(adjacentIndex) != 0)
