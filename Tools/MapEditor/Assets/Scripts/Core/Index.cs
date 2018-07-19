@@ -3,7 +3,7 @@ using System.Collections;
 
 // a Vector3 using ints instead of floats, for storing indexes and stuff
 
-namespace Uniblocks {
+namespace VoxelFramework {
 
 public class Index {
 
