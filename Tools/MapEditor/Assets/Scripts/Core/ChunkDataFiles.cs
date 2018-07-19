@@ -3,32 +3,29 @@ using System.Collections;
 using System.IO;
 using System.Collections.Generic;
 
-
 namespace VoxelFramework
 {
-
     public class ChunkDataFiles : MonoBehaviour
     {
-
         public static bool SavingChunks;
         public static Dictionary<string, string> TempChunkData; // stores chunk's data to write into a region file later
         public static Dictionary<string, string[]> LoadedRegions; // data of currently loaded regions
-
-
+        
+        // 整张地图的数据
+        public static MapData totalMapData;
+        
+        // attempts to load data from file, returns false if data is not found
         public bool LoadData()
-        { // attempts to load data from file, returns false if data is not found
-
+        {
             Chunk chunk = GetComponent<Chunk>();
             string chunkData = GetChunkData(chunk.ChunkIndex);
 
             if (chunkData != "")
             {
-
                 ChunkDataFiles.DecompressData(chunk, GetChunkData(chunk.ChunkIndex));
                 chunk.VoxelsDone = true;
                 return true;
             }
-
             else
             {
                 return false;
@@ -37,7 +34,6 @@ namespace VoxelFramework
 
         public void SaveData()
         {
-
             Chunk chunk = GetComponent<Chunk>();
             string compressedData = ChunkDataFiles.CompressData(chunk);
 
@@ -137,9 +133,9 @@ namespace VoxelFramework
 
         }
 
+        // returns the chunk data (from memory or from file), or an empty string if data can't be found
         private string GetChunkData(Index index)
-        { // returns the chunk data (from memory or from file), or an empty string if data can't be found
-
+        {
             // try to load from TempChunkData
             string indexString = index.ToString();
             if (TempChunkData.ContainsKey(indexString))
@@ -154,18 +150,19 @@ namespace VoxelFramework
             {
                 return "";
             }
-            return regionData[regionIndex];
 
+            return regionData[regionIndex];
         }
 
+        // writes the chunk data to the TempChunkData dictionary
         private void WriteChunkData(Index index, string data)
-        { // writes the chunk data to the TempChunkData dictionary
+        {
             TempChunkData[index.ToString()] = data;
         }
 
+        // returns the 1d index of a chunk's data in the region file
         private static int GetChunkRegionIndex(Index index)
-        { // returns the 1d index of a chunk's data in the region file
-
+        {
             Index newIndex = new Index(index.x, index.y, index.z);
             if (newIndex.x < 0) newIndex.x = -newIndex.x - 1;
             if (newIndex.y < 0) newIndex.y = -newIndex.y - 1;
@@ -181,9 +178,9 @@ namespace VoxelFramework
             return flatIndex;
         }
 
+        // loads region data and from file returns it, or returns null if region file is not found
         private static string[] GetRegionData(Index regionIndex)
-        { // loads region data and from file returns it, or returns null if region file is not found
-
+        {
             if (LoadRegionData(regionIndex) == true)
             {
                 return LoadedRegions[regionIndex.ToString()];
@@ -194,18 +191,18 @@ namespace VoxelFramework
             }
         }
 
+        // loads the region data into memory if file exists and it's not already loaded, returns true if data exists (and is loaded), else false
         private static bool LoadRegionData(Index regionIndex)
-        { // loads the region data into memory if file exists and it's not already loaded, returns true if data exists (and is loaded), else false
-
+        {
             string indexString = regionIndex.ToString();
-            if (LoadedRegions.ContainsKey(indexString) == false)
-            { // if not loaded
 
+            // 还没有被加载过
+            if (LoadedRegions.ContainsKey(indexString) == false)
+            {
                 // load data if region file exists
                 string regionPath = GetRegionPath(regionIndex);
                 if (File.Exists(regionPath))
                 {
-
                     StreamReader reader = new StreamReader(regionPath);
                     string[] regionData = reader.ReadToEnd().Split((char)ushort.MaxValue);
                     reader.Close();
@@ -214,7 +211,6 @@ namespace VoxelFramework
                     return true;
 
                 }
-
                 else
                 {
                     return false; // return false if region file doesn't exist
@@ -230,9 +226,14 @@ namespace VoxelFramework
             return Engine.WorldPath + (regionIndex.ToString() + ",.region");
         }
 
+        /// <summary>
+        /// 每个 region 包含了多个 chunk
+        /// 传入 chunk 索引, 获取对应的 region 索引
+        /// </summary>
+        /// <param name="index"> chunk index </param>
+        /// <returns></returns>
         private static Index GetParentRegion(Index index)
-        { // returns the index of the region containing a specific chunk
-
+        {
             Index newIndex = new Index(index.x, index.y, index.z);
 
             if (index.x < 0) newIndex.x -= 9;
@@ -263,7 +264,6 @@ namespace VoxelFramework
 
         public static IEnumerator SaveAllChunks()
         {
-
             if (!Engine.SaveVoxelData)
             {
                 Debug.LogWarning("Uniblocks: Saving is disabled. You can enable it in the Engine Settings.");
@@ -302,7 +302,6 @@ namespace VoxelFramework
         // writes data from TempChunkData into region files
         public static void SaveAllChunksInstant()
         {
-
             if (!Engine.SaveVoxelData)
             {
                 Debug.LogWarning("Uniblocks: Saving is disabled. You can enable it in the Engine Settings.");
@@ -322,13 +321,12 @@ namespace VoxelFramework
 
         }
 
+        // writes all chunk data from memory to disk, and clears memory
         public static void WriteLoadedChunks()
-        { // writes all chunk data from memory to disk, and clears memory
-
+        {
             // for every chunk loaded in dictionary
             foreach (string chunkIndex in TempChunkData.Keys)
             {
-
                 Index index = Index.FromString(chunkIndex);
                 string region = GetParentRegion(index).ToString();
 
@@ -352,7 +350,6 @@ namespace VoxelFramework
                 WriteRegionFile(regionIndex);
             }
             LoadedRegions.Clear();
-
         }
 
         private static void WriteRegionFile(string regionIndex)

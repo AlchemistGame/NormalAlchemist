@@ -307,13 +307,15 @@ namespace VoxelFramework
                 RebuildMesh();
             }
 
+            // 当距离中心点较远时, 该 chunk 将被销毁( 省得渲染占资源 )
+            // 销毁之前先存下该 chunk 的数据
             if (FlaggedToRemove)
             {
-
                 if (Engine.SaveVoxelData)
-                { // save data over time, destroy chunk when done
+                {
+                    // 保存流程走完了( 可以销毁了 )
                     if (ChunkDataFiles.SavingChunks == false)
-                    { // only destroy chunks if they are not being saved currently
+                    {
                         if (ChunkManager.SavesThisFrame < Engine.MaxChunkSaves)
                         {
                             ChunkManager.SavesThisFrame++;
@@ -322,9 +324,9 @@ namespace VoxelFramework
                         }
                     }
                 }
-
+                // if saving is disabled, destroy immediately
                 else
-                { // if saving is disabled, destroy immediately
+                {
                     Destroy(this.gameObject);
                 }
 
@@ -340,14 +342,12 @@ namespace VoxelFramework
 
         private void SaveData()
         {
-
             if (Engine.SaveVoxelData == false)
             {
                 Debug.LogWarning("Uniblocks: Saving is disabled. You can enable it in the Engine Settings.");
                 return;
             }
-
-
+            
             GetComponent<ChunkDataFiles>().SaveData();
         }
 
