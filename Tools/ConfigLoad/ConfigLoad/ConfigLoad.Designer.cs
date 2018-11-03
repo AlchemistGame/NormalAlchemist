@@ -32,6 +32,7 @@
             this.OK = new System.Windows.Forms.Button();
             this.message = new System.Windows.Forms.Label();
             this.OpenFiles = new System.Windows.Forms.Button();
+            this.btn_CodeCreate = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // SelectFolder
@@ -74,11 +75,22 @@
             this.OpenFiles.UseVisualStyleBackColor = true;
             this.OpenFiles.Click += new System.EventHandler(this.OpenFiles_Click);
             // 
+            // btn_CodeCreate
+            // 
+            this.btn_CodeCreate.Location = new System.Drawing.Point(209, 314);
+            this.btn_CodeCreate.Name = "btn_CodeCreate";
+            this.btn_CodeCreate.Size = new System.Drawing.Size(75, 23);
+            this.btn_CodeCreate.TabIndex = 4;
+            this.btn_CodeCreate.Text = "代码生成";
+            this.btn_CodeCreate.UseVisualStyleBackColor = true;
+            this.btn_CodeCreate.Click += new System.EventHandler(this.CodeCreate_Click);
+            // 
             // ConfigLoad
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(377, 349);
+            this.Controls.Add(this.btn_CodeCreate);
             this.Controls.Add(this.OpenFiles);
             this.Controls.Add(this.message);
             this.Controls.Add(this.OK);
@@ -99,6 +111,7 @@
         private System.Windows.Forms.Button OK;
         private System.Windows.Forms.Label message;
         private System.Windows.Forms.Button OpenFiles;
+        private System.Windows.Forms.Button btn_CodeCreate;
     }
 }
 

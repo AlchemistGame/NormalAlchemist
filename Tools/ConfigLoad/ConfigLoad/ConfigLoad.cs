@@ -70,5 +70,10 @@ namespace ConfigLoad
         {
             System.Diagnostics.Process.Start("explorer.exe", SaveJson.path);
         }
+
+        private void CodeCreate_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
