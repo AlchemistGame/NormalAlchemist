@@ -2340,9 +2340,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 058a2736f2afd564eae55007a87eed87, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _random: 0
-  _threshold: 0.5
-  _interval: 2
 --- !u!95 &683472905
 Animator:
   serializedVersion: 3

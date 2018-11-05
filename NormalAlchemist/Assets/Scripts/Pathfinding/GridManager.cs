@@ -19,22 +19,17 @@ namespace Pathfinding
         }
         
         public GameObject groundGO;
-        public Transform playerTrans;
 
         /// <summary>
         /// 将整个地图以方块为单位进行划分
         /// </summary>
-        public float gridWidth = 0.5f;
-        public float gridDepth = 0.5f;
-        public float gridHeight = 0.5f;
+        public float gridWidth = 1.0f;
+        public float gridDepth = 1.0f;
+        public float gridHeight = 1.0f;
 
         private float groundWidth;
         private float groundHeight;
         private Node[,,] gridData;
-
-        private List<Node> movingPath;
-        private float elapsedTime = 0;
-        private int curNodeIndex = 0;
 
         public static GridManager _instance;
         public static GridManager Instance
@@ -61,57 +56,8 @@ namespace Pathfinding
         private void Update()
         {
             RefreshGridData();
-
-            if (movingPath != null)
-            {
-                elapsedTime += Time.deltaTime;
-                if (elapsedTime >= 0.5f)
-                {
-                    elapsedTime = 0;
-                    curNodeIndex++;
-
-                    if (curNodeIndex < movingPath.Count)
-                    {
-                        Vector3 targetPos = CalcWorldCoord(movingPath[curNodeIndex].x, movingPath[curNodeIndex].y, movingPath[curNodeIndex].z);
-                        playerTrans.position = targetPos;
-                    }
-                    else
-                    {
-                        elapsedTime = 0;
-                        curNodeIndex = 0;
-                        movingPath = null;
-                    }
-                }
-            }
-            else
-            {
-                if (Input.GetMouseButtonDown(0))
-                {
-                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                    RaycastHit hit;
-                    if (Physics.Raycast(ray, out hit))
-                    {
-                        if (hit.collider.tag.Equals("Ground"))
-                        {
-                            Vector3 startPosition = playerTrans.position;
-                            Vector3 endPosition = hit.point;
-
-                            Node startNode = GetNodeFromVector3(startPosition);
-                            Node endNode = GetNodeFromVector3(endPosition);
-
-                            movingPath = Pathfinder.RequestPathfind(startNode, endNode);
-
-                            // agent complete
-                            foreach (Node n in movingPath)
-                            {
-                                Debug.Log("x:" + n.x + ",y:" + n.y + ",z:" + n.z);
-                            }
-                        }
-                    }
-                }
-            }
         }
-
+        
 
         void GetGroundSize()
         {
@@ -243,6 +189,29 @@ namespace Pathfinding
         {
             Int3 gridCoord = CalcGridCoord(pos);
             return GetNode(gridCoord.x, gridCoord.y, gridCoord.z);
+        }
+
+        public List<Vector3> GetPathFromStartToEnd(Vector3 startPosition, Vector3 endPosition)
+        {
+            Node startNode = GetNodeFromVector3(startPosition);
+            Node endNode = GetNodeFromVector3(endPosition);
+
+            List<Vector3> movingPath = new List<Vector3>();
+
+            List<Node> movingNodeList = Pathfinder.RequestPathfind(startNode, endNode);
+            foreach (var node in movingNodeList)
+            {
+                movingPath.Add(CalcWorldCoord(node.x, node.y, node.z));
+            }
+
+            return movingPath;
+        }
+
+        public Vector3 GetGridCenterPos(Vector3 groundPos)
+        {
+            Node curNode = GetNodeFromVector3(groundPos);
+            Vector3 curPos = CalcWorldCoord(curNode.x, curNode.y, curNode.z);
+            return curPos;
         }
     }
 }
