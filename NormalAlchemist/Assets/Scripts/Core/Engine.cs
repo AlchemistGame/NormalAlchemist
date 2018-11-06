@@ -205,13 +205,6 @@ namespace VoxelFramework
                 }
             }
 
-            // check anti-aliasing
-            if (QualitySettings.antiAliasing > 0)
-            {
-                Debug.LogWarning("Uniblocks: Anti-aliasing is enabled. This may cause seam lines to appear between blocks. If you see lines between blocks, try disabling anti-aliasing, switching to deferred rendering path, or adding some texture padding in the engine settings.");
-            }
-
-
             Engine.Initialized = true;
 
         }
