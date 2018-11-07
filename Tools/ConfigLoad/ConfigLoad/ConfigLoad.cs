@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-
 namespace ConfigLoad
 {
     public partial class ConfigLoad : Form
@@ -19,7 +18,8 @@ namespace ConfigLoad
 
         }
         static string folderPath;
-        LoadExcel excel;
+        LoadExcel excel = null;
+        CodeGenerationMain codeGeneration = new CodeGenerationMain();
         private void SelectFolder_Click(object sender, EventArgs e)
         {
             FolderBrowserDialog dlg = new FolderBrowserDialog();
@@ -73,6 +73,13 @@ namespace ConfigLoad
 
         private void CodeCreate_Click(object sender, EventArgs e)
         {
+            if(excel == null)
+            {
+                excel = new LoadExcel();
+            }
+            excel.LoadGeneralCodeDataFromFile(folderPath);
+            codeGeneration.GeneralCodeFromDict(excel.GeneralCodeData);
+            codeGeneration.WriteResultToCs(folderPath+"\\ConfigDefine.cs", codeGeneration.CodeGenerationResult);
 
         }
     }

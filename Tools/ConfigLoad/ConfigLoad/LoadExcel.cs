@@ -6,21 +6,23 @@ using LitJson;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using System.Reflection;
+public struct SelfPropertyInfo
+{
+    public string defaultData;
+    public string fieldType;
+    public string propertyName;
+    public string generalTarget;
+}
 namespace ConfigLoad
 {
+    
     public class LoadExcel
     {
         FileInfo[] fileInfo;
         public JsonData jsRoot;
         public Dictionary<string, string> filePath = new Dictionary<string, string>();
         
-        public struct SelfPropertyInfo
-        {
-            public string defaultData;
-            public string type;
-            public string propertyName;
-            public string generalTarget;
-        }
+      
         public Dictionary<string, List<SelfPropertyInfo>> GeneralCodeData = new Dictionary<string, List<SelfPropertyInfo>>();
         public void LoadGeneralCodeDataFromFile(string path)
         {
@@ -41,10 +43,11 @@ namespace ConfigLoad
                 {
                     for (int j = 0; j < excData.Tables[tabs].Columns.Count; ++j)
                     {
-                        var key = excData.Tables[tabs].Rows[keyRow][j];
+                        var key = excData.Tables[tabs].Rows[j][keyRow];
                         if (!(key is string))
                         {
                             idStartColumns = j;
+                            break;
                         }
                     }
                 }
@@ -53,18 +56,21 @@ namespace ConfigLoad
                 {
                     for (int i = 1; i < excData.Tables[tabs].Rows.Count; ++i)
                     {
-                        if (!(excData.Tables[tabs].Rows[i][0] is string))
-                            break;
+                        if (!(excData.Tables[tabs].Rows[0][i] is string))
+                            continue;
                         SelfPropertyInfo spi = new SelfPropertyInfo();
+                        Type t = spi.GetType();
+                        object obj = Activator.CreateInstance(t);
                         for (int j = 0; j < idStartColumns; ++j)
                         {
-                            var key = excData.Tables[tabs].Rows[keyRow][j];
+                            var key = excData.Tables[tabs].Rows[j][keyRow];
                             if(key is string)
                             {
-                                PropertyInfo pi = spi.GetType().GetProperty(key as string);
-                                if(pi!= null)
+                                string k = key.ToString();
+                                FieldInfo fi = t.GetField(k);
+                                if(fi!= null)
                                 {
-                                    pi.SetValue(spi, excData.Tables[tabs].Rows[i][j].ToString());
+                                    fi.SetValue(obj, excData.Tables[tabs].Rows[j][i].ToString());
                                 }
                             }
                             else
@@ -72,7 +78,7 @@ namespace ConfigLoad
                                 Console.WriteLine(key+" is not string");
                             }
                         }
-                        ls_OneClassPropertyInfo.Add(spi);
+                        ls_OneClassPropertyInfo.Add((SelfPropertyInfo)obj);
                     }
                 }
 
