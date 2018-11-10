@@ -113,6 +113,7 @@ namespace ConfigLoad
                     continue;
                 string _GeneralClassCode = "";
                 _GeneralClassCode += CreateTop(i.Key);
+                _GeneralClassCode += "    public enum";
                 _GeneralClassCode += CreateProperty("int", "id");
                 foreach (var j in i.Value)
                 {
