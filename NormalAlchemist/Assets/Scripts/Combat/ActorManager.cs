@@ -1,13 +1,5 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-
-public enum ACTOR_TYPE
-{
-    PLAYER,
-    NPC,
-    MONSTER
-}
 
 public struct ACTOR_INFO
 {
@@ -22,6 +14,7 @@ public class ActorManager : MonoBehaviour
 
     private List<Actor> actorList;
     private int curActorIndex;  // 当前行动者的索引
+    private Actor previousFrameHitActor;  // 上一帧鼠标所指向的 actor
 
     private void Awake()
     {
@@ -36,6 +29,8 @@ public class ActorManager : MonoBehaviour
         {
             actor.OnUpdate();
         }
+
+        OnMouseUpdate();
     }
 
     private void Init()
@@ -44,22 +39,62 @@ public class ActorManager : MonoBehaviour
         curActorIndex = 0;
     }
 
-    public void CreateActor(ACTOR_TYPE type, ACTOR_INFO basic_info)
+    private void OnMouseUpdate()
     {
-        switch (type)
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << 9))
         {
-            case ACTOR_TYPE.PLAYER:
-                Player player = new Player(basic_info);
-                player.AddToScene(Instantiate<GameObject>(Resources.Load<GameObject>("Model/UnityChan")));
-                actorList.Add(player);
-                break;
-            case ACTOR_TYPE.NPC:
-                break;
-            case ACTOR_TYPE.MONSTER:
-                break;
-            default:
-                break;
+            Actor curFrameHitActor = null;
+            foreach (var actor in actorList)
+            {
+                if (actor.sceneObject == hit.collider.gameObject)
+                {
+                    curFrameHitActor = actor;
+                }
+            }
+
+            if (curFrameHitActor != previousFrameHitActor)
+            {
+                if (previousFrameHitActor != null)
+                {
+                    previousFrameHitActor.OnMouseExit();
+                }
+
+                if (curFrameHitActor != null)
+                {
+                    curFrameHitActor.OnMouseEnter();
+                }
+            }
+
+            if (Input.GetMouseButtonDown(0))
+            {
+                if (curFrameHitActor != null)
+                {
+                    curFrameHitActor.OnMouseClick();
+                }
+            }
+
+            previousFrameHitActor = curFrameHitActor;
         }
+        else
+        {
+            if (previousFrameHitActor != null)
+            {
+                previousFrameHitActor.OnMouseExit();
+            }
+            previousFrameHitActor = null;
+        }
+    }
+
+
+    public void CreateActor(string model_path, string tag, ACTOR_INFO basic_info)
+    {
+        Player player = new Player(basic_info);
+        GameObject modelObject = Instantiate<GameObject>(Resources.Load<GameObject>(model_path));
+        modelObject.tag = tag;
+        player.AddToScene(modelObject);
+        actorList.Add(player);
     }
 
     public void FinishCurrentTurn()

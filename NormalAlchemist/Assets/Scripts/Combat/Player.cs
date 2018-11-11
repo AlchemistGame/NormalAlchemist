@@ -1,6 +1,6 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class Player : Actor
 {
@@ -9,10 +9,10 @@ public class Player : Actor
         Idle,
         Move,
         Attack,
-        Wait        // 当前回合无法行动
+        Wait        // 当前无法行动
     }
     private PlayerState _curState;
-    private PlayerState curState
+    private PlayerState CurState
     {
         get
         {
@@ -31,7 +31,7 @@ public class Player : Actor
                     curAnimator.SetBool("Run", true);
                     break;
                 case PlayerState.Attack:
-                    curAnimator.SetBool("Jab", true);
+                    selectedBlockGO.GetComponent<Renderer>().enabled = false;
                     break;
                 default:
                     break;
@@ -42,7 +42,7 @@ public class Player : Actor
     private GameObject selectedBlockGO;
     private Animator curAnimator;
     private List<Vector3> movingPath;           // 包含了正在移动的所有目标点
-    private float moveSpeed = 1f;
+    private float moveSpeed = 3f;
     private Vector3 curNodePos;                 // 玩家所处当前节点的坐标
     private float toNextNodeTotalTime = 0;      // 从当前位置到下个目标点所需经历总时长
     private float toNextNodeElapsedTime = 0;    // 已经过的时长
@@ -69,27 +69,86 @@ public class Player : Actor
 
     public override void OnUpdate()
     {
-        if (curState == PlayerState.Idle)
+        switch (CurState)
         {
-            OnCommandInput();
+            case PlayerState.Idle:
+                OnIdleInput();
+                break;
+            case PlayerState.Move:
+                OnMove();
+                break;
+            case PlayerState.Attack:
+                OnAttackInput();
+                break;
+            case PlayerState.Wait:
+                break;
+            default:
+                break;
         }
-        else if (curState == PlayerState.Move)
+    }
+
+    public void OnAttackBegin()
+    {
+        if (CurState == PlayerState.Wait)
         {
-            OnMove();
+            return;
         }
+
+        CurState = PlayerState.Attack;
+    }
+
+    public void OnAttackOver()
+    {
+        if (CurState == PlayerState.Wait)
+        {
+            return;
+        }
+
+        CurState = PlayerState.Idle;
+    }
+
+    public override void OnMouseEnter()
+    {
+        if (CurState == PlayerState.Wait)
+        {
+            ChangeModelOutlineColor(Color.red);
+        }
+        else
+        {
+            ChangeModelOutlineColor(Color.green);
+        }
+    }
+
+    public override void OnMouseExit()
+    {
+        ChangeModelOutlineColor(Color.black);
+    }
+
+    public override void OnMouseClick()
+    {
+        ChangeModelOutlineColor(Color.black);
     }
 
 
     private void Init()
     {
+        Event.Register(EventsEnum.StartPlayerAttack, this, "OnAttackBegin");
+        Event.Register(EventsEnum.FinishPlayerAttack, this, "OnAttackOver");
+
         selectedBlockGO = GameObject.Find("selected_block_graphics");
         selectedBlockGO.GetComponent<Renderer>().enabled = false;
-        
-        curState = PlayerState.Wait;
+
+        CurState = PlayerState.Wait;
     }
-    
-    private void OnCommandInput()
+
+    private void OnIdleInput()
     {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            // 鼠标正在操作 UI
+            return;
+        }
+
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
@@ -105,7 +164,9 @@ public class Player : Actor
                     {
                         toNextNodeTotalTime = (movingPath[0] - sceneObject.transform.position).magnitude / moveSpeed;
                         curNodePos = sceneObject.transform.position;
-                        curState = PlayerState.Move;
+                        sceneObject.transform.LookAt(movingPath[0]);
+                        CurState = PlayerState.Move;
+                        Event.Broadcast(EventsEnum.StartPlayerMove);
                     }
                 }
                 else
@@ -115,12 +176,52 @@ public class Player : Actor
             }
         }
     }
-    
+
+    private void OnAttackInput()
+    {
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            // 鼠标正在操作 UI
+            return;
+        }
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << 9))
+        {
+            if (!sceneObject.tag.Equals(hit.collider.tag))
+            {
+                if (Input.GetMouseButtonDown(0))
+                {
+                    sceneObject.transform.LookAt(hit.collider.transform);
+                    curAnimator.SetBool("Jab", true);
+                    Event.Broadcast(EventsEnum.FinishPlayerAttack);
+                }
+            }
+        }
+    }
+
+    private void ChangeModelOutlineColor(Color color)
+    {
+        Renderer[] renderers = sceneObject.GetComponentsInChildren<Renderer>();
+        foreach (var renderer in renderers)
+        {
+            foreach (var material in renderer.materials)
+            {
+                if (material.shader.name.Equals("Custom/Outline"))
+                {
+                    material.SetColor("_OutlineColor", color);
+                }
+            }
+        }
+    }
+
     private void OnMove()
     {
         if (movingPath == null || movingPath.Count <= 0)
         {
-            curState = PlayerState.Idle;
+            CurState = PlayerState.Idle;
+            Event.Broadcast(EventsEnum.FinishPlayerMove);
         }
         else
         {
@@ -136,6 +237,7 @@ public class Player : Actor
                 if (movingPath.Count > 0)
                 {
                     toNextNodeTotalTime = (movingPath[0] - sceneObject.transform.position).magnitude / moveSpeed;
+                    sceneObject.transform.LookAt(movingPath[0]);
                 }
             }
             else
@@ -153,11 +255,11 @@ public class Player : Actor
 
     public override void OnTurnBegin()
     {
-        curState = PlayerState.Idle;
+        CurState = PlayerState.Idle;
     }
 
     public override void OnTurnEnd()
     {
-        curState = PlayerState.Wait;
+        CurState = PlayerState.Wait;
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public abstract class Actor
 {
@@ -35,4 +33,19 @@ public abstract class Actor
     /// 回合结束时调用
     /// </summary>
     public abstract void OnTurnEnd();
+
+    public virtual void OnMouseEnter()
+    {
+        // 鼠标进入模型
+    }
+
+    public virtual void OnMouseExit()
+    {
+        // 鼠标离开模型
+    }
+
+    public virtual void OnMouseClick()
+    {
+        // 鼠标点击模型
+    }
 }
