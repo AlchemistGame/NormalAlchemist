@@ -78,9 +78,10 @@ namespace ConfigLoad
                 excel = new LoadExcel();
             }
             excel.LoadGeneralCodeDataFromFile(folderPath);
-            codeGeneration.GeneralCodeFromDict(excel.GeneralCodeData);
+            codeGeneration.GeneralCodeEnumFromDict(excel.EnumDict);
+            codeGeneration.GeneralCodeFromDict(excel.GeneralCodeData,excel.dict_ConfigIdNick);
             codeGeneration.WriteResultToCs(folderPath+"\\ConfigDefine.cs", codeGeneration.CodeGenerationResult);
-
+            codeGeneration.WriteResultToCs(folderPath + "\\EnumDefine.cs", codeGeneration.EnumGenerationResult);
         }
     }
 }

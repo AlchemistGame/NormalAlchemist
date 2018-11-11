@@ -12,10 +12,10 @@ public struct SelfPropertyInfo
     public string fieldType;
     public string propertyName;
     public string generalTarget;
+    public List<string> id_nick;
 }
 namespace ConfigLoad
 {
-    
     public class LoadExcel
     {
         FileInfo[] fileInfo;
@@ -24,9 +24,14 @@ namespace ConfigLoad
         
       
         public Dictionary<string, List<SelfPropertyInfo>> GeneralCodeData = new Dictionary<string, List<SelfPropertyInfo>>();
+
+        public Dictionary<string, List<string>> dict_ConfigIdNick = new Dictionary<string, List<string>>();
+
+        public Dictionary<string, string> EnumDict = new Dictionary<string, string>();
         public void LoadGeneralCodeDataFromFile(string path)
         {
             GeneralCodeData.Clear();
+            dict_ConfigIdNick.Clear();
             DirectoryInfo dirInfo = new DirectoryInfo(path);
             FileInfo[] fileInfo = dirInfo.GetFiles("*.xlsx", SearchOption.AllDirectories);
             const int keyRow = 0;
@@ -51,6 +56,24 @@ namespace ConfigLoad
                         }
                     }
                 }
+                List<string> ls_idNickName = new List<string>();
+                for(int tabs = 0; tabs < excData.Tables.Count; ++tabs)
+                {
+                    for (int j = idStartColumns+1; j < excData.Tables[tabs].Columns.Count; ++j)
+                    {
+                        var key = excData.Tables[tabs].Rows[j][keyRow];
+
+                        if(key is string)
+                        {
+                            if((key as string).IndexOf('|') != -1)
+                            {
+                                ls_idNickName.Add(key as string);
+                            }
+                        }
+
+                    }
+                }
+
                 List<SelfPropertyInfo> ls_OneClassPropertyInfo = new List<SelfPropertyInfo>();
                 for (int tabs = 0; tabs < excData.Tables.Count; ++tabs)
                 {
@@ -67,10 +90,28 @@ namespace ConfigLoad
                             if(key is string)
                             {
                                 string k = key.ToString();
+                                string value = excData.Tables[tabs].Rows[j][i].ToString();
+                                if (k == "fieldType" && value.ToLower().IndexOf("enum")!=-1)
+                                {
+                                    string temp = value.ToLower();
+                                    //enum Color:{ Red = 1| Black=2| Green=3 }
+                                    temp = temp.Replace("enum", "").Replace(" ", "").Replace("{", "").Replace("}","");
+                                    string[] enumValue = temp.Split(':');
+                                    if (!EnumDict.ContainsKey(enumValue[0]))
+                                    {
+                                        EnumDict.Add(enumValue[0], enumValue[1]);
+                                    }
+                                    else
+                                    {
+                                        Console.Write("enum Name:"+enumValue[0]+" is Already Exist!!");
+                                    }
+                                    value = "enum|" + enumValue[0];
+                                }
+                                
                                 FieldInfo fi = t.GetField(k);
                                 if(fi!= null)
                                 {
-                                    fi.SetValue(obj, excData.Tables[tabs].Rows[j][i].ToString());
+                                    fi.SetValue(obj, value);
                                 }
                             }
                             else
@@ -78,10 +119,12 @@ namespace ConfigLoad
                                 Console.WriteLine(key+" is not string");
                             }
                         }
-                        ls_OneClassPropertyInfo.Add((SelfPropertyInfo)obj);
+                        SelfPropertyInfo result = (SelfPropertyInfo)obj;
+                        //result.id_nick = ls_idNickName;
+                        ls_OneClassPropertyInfo.Add(result);
                     }
                 }
-
+                dict_ConfigIdNick.Add(fileData.Name.Replace(".xlsx", "").Replace(".xls", ""), ls_idNickName);
                 GeneralCodeData.Add(fileData.Name.Replace(".xlsx", "").Replace(".xls", ""), ls_OneClassPropertyInfo);
             }
         }

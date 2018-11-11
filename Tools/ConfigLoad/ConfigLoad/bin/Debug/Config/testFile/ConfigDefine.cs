@@ -1,5 +1,9 @@
 namespace DataConfig
 {
+public enum templeteXLSXId
+ {
+burning = 1,
+}
     public class templeteXLSX
     {
         public int id;
@@ -9,5 +13,6 @@ namespace DataConfig
         public int Damage = 0;
         public byte Duration;
         public float Bonus = 1;
+        public ABILLITY MainAttribute = ABILLITY.NULL;
     }
 }
