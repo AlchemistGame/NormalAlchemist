@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections;
 
 // sends VoxelEvents such as OnLook, OnMouseDown, etc.
 namespace VoxelFramework
@@ -16,10 +15,7 @@ namespace VoxelFramework
 
         public void Update()
         {
-            if (InputController.currentMode == MapEditorMode.Edit)
-            {
-                MouseCursorEvents();
-            }
+            MouseCursorEvents();
         }
 
         /// <summary>

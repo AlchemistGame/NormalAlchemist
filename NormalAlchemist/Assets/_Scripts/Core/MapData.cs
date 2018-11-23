@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
 
 namespace VoxelFramework
 {
@@ -13,4 +11,3 @@ namespace VoxelFramework
         public string[] chunkData;
     }
 }
-

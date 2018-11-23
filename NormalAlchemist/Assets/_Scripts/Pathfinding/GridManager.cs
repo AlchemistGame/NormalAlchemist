@@ -1,6 +1,5 @@
-﻿using UnityEngine;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace Pathfinding
 {
@@ -17,7 +16,7 @@ namespace Pathfinding
                 z = height;
             }
         }
-        
+
         public GameObject groundGO;
 
         /// <summary>
@@ -57,7 +56,7 @@ namespace Pathfinding
         {
             RefreshGridData();
         }
-        
+
 
         void GetGroundSize()
         {
@@ -87,7 +86,7 @@ namespace Pathfinding
                         node.x = x;
                         node.y = y;
                         node.z = z;
-                        
+
                         //then place it to the grid
                         gridData[x, y, z] = node;
                     }
@@ -120,7 +119,7 @@ namespace Pathfinding
             int gridHeightInGrids = (int)(groundHeight / gridHeight);
             return new Int3(gridWidthInGrids, gridDepthInGrids, gridHeightInGrids);
         }
-        
+
         // 根据 grid 坐标计算 world 坐标
         Vector3 CalcWorldCoord(int gridX, int gridY, int gridZ)
         {
@@ -138,11 +137,9 @@ namespace Pathfinding
             Vector3 initPos = CalcInitPos();
 
             float x = (worldPos.x - initPos.x) / gridWidth;
-            float y = (worldPos.y - initPos.y) / gridDepth;
             float z = (worldPos.z - initPos.z) / gridHeight;
 
             int gridX = Mathf.RoundToInt(x);
-            int gridY = Mathf.RoundToInt(y);
             int gridZ = Mathf.RoundToInt(z);
 
             return new Int3(gridX, 0, gridZ);

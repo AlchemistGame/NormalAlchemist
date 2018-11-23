@@ -1,7 +1,7 @@
-﻿using UnityEngine;
+﻿using System;
 using System.Collections.Generic;
-using System;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.UI;
 public class UIManager : BaseManager
 {
@@ -568,8 +568,8 @@ public class UIManager : BaseManager
                 Enum_NeedLead_UI uiEnum = TypeToEnum(i.GetType());
                 if (uiEnum != Enum_NeedLead_UI.Null)
                 {
-                    Event.Broadcast("UIManager_UIIsShow", new object[] { uiEnum });
-                    Event.Broadcast("CallGuide", new object[] { dict_AllUICache[i.GetType()].gameObject, uiEnum });
+                    EventManager.Broadcast("UIManager_UIIsShow", new object[] { uiEnum });
+                    EventManager.Broadcast("CallGuide", new object[] { dict_AllUICache[i.GetType()].gameObject, uiEnum });
                 }
             }
         }
@@ -578,12 +578,12 @@ public class UIManager : BaseManager
             Enum_NeedLead_UI uiEnum = TypeToEnum(m_CoverUIStack.Peek().GetType());
             if (uiEnum != Enum_NeedLead_UI.Null)
             {
-                Event.Broadcast("UIManager_UIIsShow", new object[] { uiEnum });
+                EventManager.Broadcast("UIManager_UIIsShow", new object[] { uiEnum });
 
-                Event.Broadcast("CallGuide",new object []{ dict_AllUICache[m_CoverUIStack.Peek().GetType()].gameObject, uiEnum });
+                EventManager.Broadcast("CallGuide", new object[] { dict_AllUICache[m_CoverUIStack.Peek().GetType()].gameObject, uiEnum });
             }
             else
-            { 
+            {
                 Debug.LogError(m_CoverUIStack.Peek().GetType().ToString() + " is Not in TypeCastFunction is there right Type Or Forget add it");
             }
         }
@@ -843,31 +843,31 @@ public class UIManager : BaseManager
             case emUIStatus.emUIStatus_None:
                 ShowUI(null);
                 break;
-            //case emUIStatus.emUIStatus_Login:
-            //    ShowUI(typeof(LoginUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
-            //    ClearSceneInfo();
-            //    break;
-            //case emUIStatus.emUIstatus_CreatePlayer:
-            //    ShowUI(typeof(CreatePlayerUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
-            //    ClearSceneInfo();
-            //    break;
-            //case emUIStatus.emUIstatus_MainUI:
-            //    ShowUI(typeof(MainUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
-            //    ClearSceneInfo();
-            //    //ShowUIDontHideOther(typeof(TalkUI));
-            //    //ShowUI(typeof(TalkUI),Enum_BaseUIShowMode.);
-            //    //ShowUIDontHideOther(typeof(PlayerInfo));
-            //    break;
-            ////TODO之后改为主界面UI
-            //case emUIStatus.emUIstatus_FightUi:
-            //    ShowUI(typeof(FightingUI), Enum_BaseUIShowMode.HideOther, true, true, isClearAll: true);
-            //    //ShowUIDontHideOther(typeof(FightingUI));
-            //    break;
-            //case emUIStatus.emUIstatus_StateWarUI:
-            //    ShowUI(typeof(StateWarUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
-            //    ClearSceneInfo();
-            //    //ShowUIDontHideOther(typeof(TalkUI));
-            //    break;
+                //case emUIStatus.emUIStatus_Login:
+                //    ShowUI(typeof(LoginUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
+                //    ClearSceneInfo();
+                //    break;
+                //case emUIStatus.emUIstatus_CreatePlayer:
+                //    ShowUI(typeof(CreatePlayerUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
+                //    ClearSceneInfo();
+                //    break;
+                //case emUIStatus.emUIstatus_MainUI:
+                //    ShowUI(typeof(MainUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
+                //    ClearSceneInfo();
+                //    //ShowUIDontHideOther(typeof(TalkUI));
+                //    //ShowUI(typeof(TalkUI),Enum_BaseUIShowMode.);
+                //    //ShowUIDontHideOther(typeof(PlayerInfo));
+                //    break;
+                ////TODO之后改为主界面UI
+                //case emUIStatus.emUIstatus_FightUi:
+                //    ShowUI(typeof(FightingUI), Enum_BaseUIShowMode.HideOther, true, true, isClearAll: true);
+                //    //ShowUIDontHideOther(typeof(FightingUI));
+                //    break;
+                //case emUIStatus.emUIstatus_StateWarUI:
+                //    ShowUI(typeof(StateWarUI), Enum_BaseUIShowMode.HideOther, true, isClearAll: true);
+                //    ClearSceneInfo();
+                //    //ShowUIDontHideOther(typeof(TalkUI));
+                //    break;
         }
     }
 

@@ -18,10 +18,10 @@ public class ControlPanelView : MonoBehaviour
 
     private void Start()
     {
-        Event.Register(EventsEnum.StartPlayerMove, this, "ForBidPlayerOperation");
-        Event.Register(EventsEnum.FinishPlayerMove, this, "RecoverPlayerOperation");
-        Event.Register(EventsEnum.StartPlayerAttack, this, "ForBidPlayerOperation");
-        Event.Register(EventsEnum.FinishPlayerAttack, this, "RecoverPlayerOperation");
+        EventManager.Register(EventsEnum.StartPlayerMove, this, "ForBidPlayerOperation");
+        EventManager.Register(EventsEnum.FinishPlayerMove, this, "RecoverPlayerOperation");
+        EventManager.Register(EventsEnum.StartPlayerAttack, this, "ForBidPlayerOperation");
+        EventManager.Register(EventsEnum.FinishPlayerAttack, this, "RecoverPlayerOperation");
 
         startGameBtn.onClick.AddListener(() =>
         {
@@ -34,7 +34,7 @@ public class ControlPanelView : MonoBehaviour
 
         attackBtn.onClick.AddListener(() =>
         {
-            Event.Broadcast(EventsEnum.StartPlayerAttack);
+            EventManager.Broadcast(EventsEnum.StartPlayerAttack);
         });
 
         finishBtn.onClick.AddListener(() =>

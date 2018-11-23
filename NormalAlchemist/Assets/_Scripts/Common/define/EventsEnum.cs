@@ -19,4 +19,14 @@
     /// 角色攻击动作结束
     /// </summary>
     public static string FinishPlayerAttack = "finish_player_attack";
+
+    public const string EnterLobbyMode = "EnterLobbyMode";
+    public const string EnterEditMode = "EnterEditMode";
+
+    /// <summary>
+    /// 保存地图
+    /// </summary>
+    public const string SaveMap = "save_map";
+    public const string DisplaySaveMapStart = "display_save_map_start";
+    public const string DisplaySaveMapFinish = "display_save_map_finish";
 }

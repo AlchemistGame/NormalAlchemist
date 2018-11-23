@@ -138,8 +138,8 @@ public class Player : Actor
 
     private void Init()
     {
-        Event.Register(EventsEnum.StartPlayerAttack, this, "OnAttackBegin");
-        Event.Register(EventsEnum.FinishPlayerAttack, this, "OnAttackOver");
+        EventManager.Register(EventsEnum.StartPlayerAttack, this, "OnAttackBegin");
+        EventManager.Register(EventsEnum.FinishPlayerAttack, this, "OnAttackOver");
 
         selectedBlockGO = GameObject.Find("selected_block_graphics");
         selectedBlockGO.GetComponent<Renderer>().enabled = false;
@@ -172,7 +172,7 @@ public class Player : Actor
                         curNodePos = sceneObject.transform.position;
                         sceneObject.transform.LookAt(movingPath[0]);
                         CurState = PlayerState.Move;
-                        Event.Broadcast(EventsEnum.StartPlayerMove);
+                        EventManager.Broadcast(EventsEnum.StartPlayerMove);
                     }
                 }
                 else
@@ -202,7 +202,7 @@ public class Player : Actor
                 {
                     sceneObject.transform.LookAt(hit.collider.transform);
                     curAnimator.SetBool("Jab", true);
-                    Event.Broadcast(EventsEnum.FinishPlayerAttack);
+                    EventManager.Broadcast(EventsEnum.FinishPlayerAttack);
                 }
             }
         }
@@ -228,7 +228,7 @@ public class Player : Actor
         if (movingPath == null || movingPath.Count <= 0)
         {
             CurState = PlayerState.Idle;
-            Event.Broadcast(EventsEnum.FinishPlayerMove);
+            EventManager.Broadcast(EventsEnum.FinishPlayerMove);
         }
         else
         {

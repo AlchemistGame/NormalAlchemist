@@ -6,7 +6,7 @@ using UnityEngine;
 /// <summary>
 /// 事件系统
 /// </summary>
-public class Event
+public class EventManager
 {
     private struct sTypeMethod
     {
@@ -85,7 +85,7 @@ public class Event
         }
     }
 
-    public static void Broadcast(string registEvent, object[] args = null)
+    public static void Broadcast(string registEvent, params object[] args)
     {
         List<sTypeMethod> ls_TypeMethod;
         if (dict_FireMethod.TryGetValue(registEvent, out ls_TypeMethod))
