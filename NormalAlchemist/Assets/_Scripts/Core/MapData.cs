@@ -1,13 +1,17 @@
 ﻿using System;
 
-namespace VoxelFramework
+/// <summary>
+/// 地图关卡数据
+/// </summary>
+[Serializable]
+public class MapData
 {
-    /// <summary>
-    /// 用于地图数据的保存与读取
-    /// </summary>
-    [Serializable]
-    public class MapData
-    {
-        public string[] chunkData;
-    }
+    public string blocks;
+    public string settings;
+    public float mostLeft;
+    public float mostRight;
+    public float mostForward;
+    public float mostBack;
+    public float mostUp;
+    public float mostBottom;
 }

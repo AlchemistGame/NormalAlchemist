@@ -1,0 +1,139 @@
+{
+    "categories": [
+        {
+            "CategoryName" : "Animal",
+            "tiles" : [
+                {
+                    "id" : "1",
+                    "LoadPath" : "MapAssets/Animal/Ani_Bird"
+                },
+                {
+                    "id" : "2",
+                    "LoadPath" : "MapAssets/Animal/Ani_FOX"
+                },
+                {
+                    "id" : "3",
+                    "LoadPath" : "MapAssets/Animal/Ani_OWL"
+                }
+            ]
+        },
+        {
+            "CategoryName" : "Building",
+            "tiles" : [
+                {
+                    "id" : "101",
+                    "LoadPath" : "MapAssets/Building/BUD_Bridge_01"
+                },
+                {
+                    "id" : "102",
+                    "LoadPath" : "MapAssets/Building/BUD_Building_A"
+                },
+                {
+                    "id" : "103",
+                    "LoadPath" : "MapAssets/Building/BUD_Building_A 1"
+                },
+                {
+                    "id" : "104",
+                    "LoadPath" : "MapAssets/Building/BUD_Building_A 2"
+                },
+                {
+                    "id" : "105",
+                    "LoadPath" : "MapAssets/Building/BUD_Building_B"
+                },
+                {
+                    "id" : "106",
+                    "LoadPath" : "MapAssets/Building/BUD_Building_C"
+                },
+                {
+                    "id" : "107",
+                    "LoadPath" : "MapAssets/Building/BUD_Building_D"
+                },
+                {
+                    "id" : "108",
+                    "LoadPath" : "MapAssets/Building/BUD_Building_E_01"
+                }
+            ]
+        },
+        {
+            "CategoryName" : "Plane_Grass",
+            "tiles" : [
+                {
+                    "id" : "201",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX1_Grass_01"
+                },
+                {
+                    "id" : "202",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX1_Grass_02"
+                },
+                {
+                    "id" : "203",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX1_Grass_03"
+                },
+                {
+                    "id" : "204",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX1_Grass_04"
+                },
+                {
+                    "id" : "205",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX1_Grass_05"
+                },
+                {
+                    "id" : "206",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX1_Grass_06"
+                },
+                {
+                    "id" : "207",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX2_Grass_01"
+                },
+                {
+                    "id" : "208",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX2_Grass_02"
+                },
+                {
+                    "id" : "209",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX2_Grass_03"
+                },
+                {
+                    "id" : "210",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX22_Grass_01"
+                },
+                {
+                    "id" : "211",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX22_Grass_02"
+                },
+                {
+                    "id" : "212",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX23_ Slope_Grass_01"
+                },
+                {
+                    "id" : "213",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX23_Grass_01"
+                },
+                {
+                    "id" : "214",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX23_Grass_02"
+                },
+                {
+                    "id" : "215",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX33_Grass_01"
+                },
+                {
+                    "id" : "216",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX33_Grass_02"
+                },
+                {
+                    "id" : "217",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX_Grass_BOD_01"
+                },
+                {
+                    "id" : "218",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX_Grass_BOD_02"
+                },
+                {
+                    "id" : "219",
+                    "LoadPath" : "MapAssets/Plane_Grass/PBOX_Grass_BOD_03"
+                }
+            ]
+        }
+    ]
+}

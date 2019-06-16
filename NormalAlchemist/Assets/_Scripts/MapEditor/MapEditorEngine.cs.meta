@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: 05fa6935e10954699ab141fc16d0ed10
+labels:
+- TileMapEditor
+- proTileMapEditor
+- MapEditor
+- LevelEditor
+- 2dMapeditor
+- 3dmapeditor
+- proTile
+- Tile
+- Map
+- Level
+- Editor
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
