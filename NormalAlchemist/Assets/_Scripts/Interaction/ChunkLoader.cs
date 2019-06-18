@@ -7,8 +7,8 @@ namespace VoxelFramework
 {
     public class ChunkLoader : MonoBehaviour
     {
-        private Index LastPos;
-        private Index currentPos;
+        private VoxelPos LastPos;
+        private VoxelPos currentPos;
         
         public void Update()
         {

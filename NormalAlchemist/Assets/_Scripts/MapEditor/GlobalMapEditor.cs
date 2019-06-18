@@ -2,10 +2,7 @@
 
 public class GlobalMapEditor
 {
-    public static bool canBuild = false;
     public static int mapObjectCount = 0;
-    // 是否检测重叠
-    public static bool OverlapDetection = true;
     public static int UndoSession = 0;
     public static string RootMapDir = Application.streamingAssetsPath + "/Maps/";
     public static string TemplatesDir = RootMapDir + "Templates/";

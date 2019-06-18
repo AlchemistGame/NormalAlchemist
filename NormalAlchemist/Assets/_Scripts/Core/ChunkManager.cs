@@ -26,7 +26,7 @@ namespace VoxelFramework
 
         // local flags	
         private bool Done;
-        private Index LastRequest;
+        private VoxelPos LastRequest;
         private float targetFrameDuration;
         private Stopwatch frameStopwatch;
         private int SpawnQueue;
@@ -107,10 +107,10 @@ namespace VoxelFramework
         public static GameObject GetChunk(int x, int y, int z)
         { // returns the gameObject of the chunk with the specified x,y,z, or returns null if the object is not instantiated
 
-            return GetChunk(new Index(x, y, z));
+            return GetChunk(new VoxelPos(x, y, z));
         }
 
-        public static GameObject GetChunk(Index index)
+        public static GameObject GetChunk(VoxelPos index)
         {
 
             Chunk chunk = ChunkManager.GetChunkComponent(index);
@@ -128,10 +128,10 @@ namespace VoxelFramework
         public static Chunk GetChunkComponent(int x, int y, int z)
         {
 
-            return GetChunkComponent(new Index(x, y, z));
+            return GetChunkComponent(new VoxelPos(x, y, z));
         }
 
-        public static Chunk GetChunkComponent(Index index)
+        public static Chunk GetChunkComponent(VoxelPos index)
         {
 
             string indexString = index.ToString();
@@ -154,12 +154,12 @@ namespace VoxelFramework
             GameObject chunk = ChunkManager.GetChunk(x, y, z);
             if (chunk == null)
             {
-                return Engine.ChunkManagerInstance.DoSpawnChunk(new Index(x, y, z));
+                return Engine.ChunkManagerInstance.DoSpawnChunk(new VoxelPos(x, y, z));
             }
             else return chunk;
         }
 
-        public static GameObject SpawnChunk(Index index)
+        public static GameObject SpawnChunk(VoxelPos index)
         { // spawns a single chunk (only if it's not already spawned)
 
             GameObject chunk = ChunkManager.GetChunk(index);
@@ -170,7 +170,7 @@ namespace VoxelFramework
             else return chunk;
         }
 
-        GameObject DoSpawnChunk(Index index)
+        GameObject DoSpawnChunk(VoxelPos index)
         {
             GameObject chunkObject = Instantiate(ChunkObject, index.ToVector3(), transform.rotation) as GameObject;
             Chunk chunk = chunkObject.GetComponent<Chunk>();
@@ -180,12 +180,12 @@ namespace VoxelFramework
 
         public static void SpawnChunks(float x, float y, float z)
         { // take world pos, convert to chunk index
-            Index index = Engine.PositionToChunkIndex(new Vector3(x, y, z));
+            VoxelPos index = Engine.PositionToChunkIndex(new Vector3(x, y, z));
             Engine.ChunkManagerInstance.TrySpawnChunks(index);
         }
         public static void SpawnChunks(Vector3 position)
         {
-            Index index = Engine.PositionToChunkIndex(position);
+            VoxelPos index = Engine.PositionToChunkIndex(position);
             Engine.ChunkManagerInstance.TrySpawnChunks(index);
         }
 
@@ -195,12 +195,12 @@ namespace VoxelFramework
             Engine.ChunkManagerInstance.TrySpawnChunks(x, y, z);
         }
 
-        public static void SpawnChunks(Index index)
+        public static void SpawnChunks(VoxelPos index)
         {
             Engine.ChunkManagerInstance.TrySpawnChunks(index.x, index.y, index.z);
         }
 
-        private void TrySpawnChunks(Index index)
+        private void TrySpawnChunks(VoxelPos index)
         {
             TrySpawnChunks(index.x, index.y, index.z);
         }
@@ -215,7 +215,7 @@ namespace VoxelFramework
             // if we are spawning chunks already, flag to spawn again once the previous round is finished using the last requested position as origin.
             else
             {
-                LastRequest = new Index(x, y, z);
+                LastRequest = new VoxelPos(x, y, z);
                 SpawnQueue = 1;
                 StopSpawning = true;
                 ChunkUpdateQueue.Clear();
@@ -314,7 +314,7 @@ namespace VoxelFramework
                                             // spawn neighbor chunks
                                             for (int d = 0; d < 6; d++)
                                             {
-                                                Index neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((Direction)d);
+                                                VoxelPos neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((CubeDirection)d);
                                                 GameObject neighborChunk = GetChunk(neighborIndex);
                                                 if (neighborChunk == null)
                                                 {
@@ -348,7 +348,7 @@ namespace VoxelFramework
                                         // spawn neighbor chunks if they're not spawned yet
                                         for (int d = 0; d < 6; d++)
                                         {
-                                            Index neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((Direction)d);
+                                            VoxelPos neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((CubeDirection)d);
                                             GameObject neighborChunk = GetChunk(neighborIndex);
                                             if (neighborChunk == null)
                                             {

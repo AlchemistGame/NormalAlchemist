@@ -5,7 +5,7 @@ namespace VoxelFramework
 {
     public class ColliderEventsSender : MonoBehaviour
     {
-        private Index LastIndex;
+        private VoxelPos LastIndex;
         private Chunk LastChunk;
 
         public void Update()
@@ -16,7 +16,7 @@ namespace VoxelFramework
 
             // get the voxelInfo from the transform's position
             Chunk chunk = chunkObject.GetComponent<Chunk>();
-            Index voxelIndex = chunk.PositionToVoxelIndex(transform.position);
+            VoxelPos voxelIndex = chunk.PositionToVoxelIndex(transform.position);
             VoxelInfo voxelInfo = new VoxelInfo(voxelIndex, chunk);
             print(voxelInfo.GetVoxel());
 

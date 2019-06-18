@@ -54,13 +54,7 @@ public class MapEditorEngine : MonoBehaviour
     private int globalGridSizeX;
     private int globalGridSizeZ;
     private Vector3 gridsize;
-    private static float ZERO_F = .0f;
-    private float offsetZ;
-    private float offsetX;
-    private float offsetY;
-    private float lastPosX;
-    private float lastPosY;
-    private float lastPosZ;
+    private static readonly float ZERO_F = .0f;
     private float rotationOffset;
     private string currentObjectID;
     private MassBuildEngine uMBE;
@@ -82,7 +76,7 @@ public class MapEditorEngine : MonoBehaviour
     private GameObject MAP_DYNAMIC;
     private GameObject MAIN;
     private GameObject cameraGO;
-    private List<catInfo> allTiles = new List<catInfo>();
+    private List<CatInfo> allTiles = new List<CatInfo>();
     private List<GameObject> currentCategoryGoes = new List<GameObject>();
     private List<Texture2D> currentCategoryPrevs = new List<Texture2D>();
     private List<string> currentCategoryNames = new List<string>();
@@ -94,7 +88,6 @@ public class MapEditorEngine : MonoBehaviour
     private GameObject hitObject;
     private bool isAltPressed;
     private float cameraSensitivity;
-    private Vector3 customTileOffset = Vector3.zero;
 
     // UI objects
     private List<GameObject> undo_objs = new List<GameObject>();
@@ -111,7 +104,7 @@ public class MapEditorEngine : MonoBehaviour
     private CameraMoveController cameraMove;
     private bool isCastShadows;
 
-    public class catInfo : System.IDisposable
+    public class CatInfo : System.IDisposable
     {
         public string catName;
         public List<GameObject> catObjs = new List<GameObject>();
@@ -120,13 +113,13 @@ public class MapEditorEngine : MonoBehaviour
         public List<string> catIDNames = new List<string>();
         public List<string> catLoadPaths = new List<string>();
 
-        public catInfo(string _catName)
+        public CatInfo(string _catName)
         {
             // for clone
             catName = _catName;
         }
 
-        public catInfo(string _catName, List<string> _catObjsNames, List<GameObject> _catObjs, List<Texture2D> _catObjsPrevs, List<string> _catIDNames, List<string> _catLoadPaths)
+        public CatInfo(string _catName, List<string> _catObjsNames, List<GameObject> _catObjs, List<Texture2D> _catObjsPrevs, List<string> _catIDNames, List<string> _catLoadPaths)
         {
             catName = _catName;
             catObjs = _catObjs;
@@ -180,7 +173,6 @@ public class MapEditorEngine : MonoBehaviour
         currentLayer = 0;
         isMouseDown = false;
         isCamGridMoving = false;
-        GlobalMapEditor.canBuild = true;
         notReady = true;
         canBuild = false;
         cameraGO = GameObject.Find("MapEditorCamera");
@@ -408,7 +400,7 @@ public class MapEditorEngine : MonoBehaviour
         {
             if (currentTile)
             {
-                currentTile.transform.position = new Vector3(-10000f, -10000f, -10000f);
+                Destroy(currentTile);
             }
 
             Ray findRay = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -610,313 +602,130 @@ public class MapEditorEngine : MonoBehaviour
 
         if (currentTile && currentMode == MapEditorMode.Place)
         {
-            Ray buildRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit buildHit;
+            canBuild = false;
 
-            if (Physics.Raycast(buildRay, out buildHit, 1000))
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out RaycastHit buildHit, 1000) && buildHit.collider)
             {
-                if (buildHit.collider)
+                hitObject = buildHit.collider.gameObject;
+
+                if (!buildHit.collider.gameObject.name.Equals("Grid"))
                 {
-                    GameObject hitObj = buildHit.collider.gameObject;
-                    hitObject = hitObj;
-
-                    if (!buildHit.collider.gameObject.name.Equals("Grid"))
+                    if (isMouseDown)
                     {
-                        canBuild = false;
-
-                        if (isMouseDown)
+                        if (buildHit.collider.gameObject.name.Equals("uteTcDummy(Clone)"))
                         {
-                            if (buildHit.collider.gameObject.name.Equals("uteTcDummy(Clone)"))
-                            {
-                                Destroy(buildHit.collider.gameObject);
-                            }
-                        }
-
-                        if (buildHit.normal != Vector3.up)
-                        {
-                            return;
+                            Destroy(buildHit.collider.gameObject);
                         }
                     }
 
-                    bool collZB = false;
-                    bool collZA = false;
-                    bool collXB = false;
-                    bool collXA = false;
-                    bool collYB = false;
-                    bool collYA = false;
-                    float sizeX = currentTile.GetComponent<Collider>().bounds.size.x;//*currentTile.transform.localScale.x;
-                    float sizeY = currentTile.GetComponent<Collider>().bounds.size.y;//*currentTile.transform.localScale.y;
-                    float sizeZ = currentTile.GetComponent<Collider>().bounds.size.z;//*currentTile.transform.localScale.z;
-                    float centerX = sizeX / 2.0f;
-                    float centerY = sizeY / 2.0f;
-                    float centerZ = sizeZ / 2.0f;
-                    float centerPosZ = centerZ + (currentTile.transform.position.z - (sizeZ / 2.0f));
-                    int castSizeX = (int)currentTile.GetComponent<Collider>().bounds.size.x;
-                    int castSizeZ = (int)currentTile.GetComponent<Collider>().bounds.size.z;
-                    int castSizeSide;
-
-                    if (castSizeX == castSizeZ)
+                    if (buildHit.normal != Vector3.up)
                     {
-                        castSizeSide = castSizeX;
+                        return;
                     }
-                    else if (castSizeX > castSizeZ)
-                    {
-                        castSizeSide = castSizeX;
-                    }
-                    else
-                    {
-                        castSizeSide = castSizeZ;
-                    }
+                }
 
-                    float normalX = ZERO_F;
-                    float normalZ = ZERO_F;
-                    float normalY = ZERO_F;
+                float sizeX = currentTile.GetComponent<Collider>().bounds.size.x;
+                float sizeY = currentTile.GetComponent<Collider>().bounds.size.y;
+                float sizeZ = currentTile.GetComponent<Collider>().bounds.size.z;
+                float centerX = sizeX / 2.0f;
+                float centerY = sizeY / 2.0f;
+                float centerZ = sizeZ / 2.0f;
+                float centerPosZ = centerZ + (currentTile.transform.position.z - (sizeZ / 2.0f));
+                int castSizeX = (int)currentTile.GetComponent<Collider>().bounds.size.x;
+                int castSizeZ = (int)currentTile.GetComponent<Collider>().bounds.size.z;
+                int castSizeSide;
 
-
-                    if (buildHit.normal.y == ZERO_F)
-                    {
-                        if ((int)buildHit.normal.x > ZERO_F)
-                        {
-                            normalX = 0.5f;
-                        }
-                        else if ((int)buildHit.normal.x < ZERO_F)
-                        {
-                            normalX = -0.5f;
-                        }
-
-                        if ((int)buildHit.normal.z > ZERO_F)
-                        {
-                            normalZ = 0.5f;
-                        }
-                        else if ((int)buildHit.normal.z < ZERO_F)
-                        {
-                            normalZ = -0.5f;
-                        }
-                    }
-
-
-                    if (buildHit.normal.y > ZERO_F)
-                    {
-                        normalY = 0.5f;
-                    }
-                    else if (buildHit.normal.y < ZERO_F)
-                    {
-                        normalY = -0.5f;
-                    }
-
-                    float internalOffsetX = ZERO_F;
-                    float internalOffsetZ = ZERO_F;
-                    float internalOffsetY = ZERO_F;
-
-                    if (Mathf.Round(currentTile.GetComponent<Collider>().bounds.size.z) % 2 == 0)
-                    {
-                        internalOffsetZ = 0.5f;
-                    }
-
-                    if (Mathf.Round(currentTile.GetComponent<Collider>().bounds.size.x) % 2 == 0)
-                    {
-                        internalOffsetX = 0.5f;
-                    }
-
-                    if (Mathf.Round(currentTile.GetComponent<Collider>().bounds.size.y) % 2 == 0)
-                    {
-                        internalOffsetY = 0.5f;
-                    }
-
-                    float offsetFixX = 0.05f;//*currentTile.transform.localScale.x;
-                    float offsetFixZ = 0.05f;//*currentTile.transform.localScale.z;
-                    float offsetFixY = 0.05f;//*currentTile.transform.localScale.y;
-                    float castPosX = currentTile.GetComponent<Collider>().bounds.center.x;//centerPosX+(currentTile.GetComponent<BoxCollider>().center.x*currentTile.transform.localScale.x);
-                    float castPosZ = currentTile.GetComponent<Collider>().bounds.center.z;//centerPosZ+(currentTile.GetComponent<BoxCollider>().center.z*currentTile.transform.localScale.z);
-                    float castPosY = currentTile.GetComponent<Collider>().bounds.center.y;//centerPosY+(currentTile.GetComponent<BoxCollider>().center.y*currentTile.transform.localScale.y);
-
-                    Vector3 castFullPos = new Vector3(castPosX, castPosY, castPosZ);
-                    Vector3 checkXA = new Vector3(castPosX + centerX - offsetFixX, castPosY, castPosZ);
-                    Vector3 checkXB = new Vector3(castPosX - centerX + offsetFixX, castPosY, castPosZ);
-                    Vector3 checkZA = new Vector3(castPosX, castPosY, castPosZ - offsetFixZ + centerZ);
-                    Vector3 checkZB = new Vector3(castPosX, castPosY, castPosZ + offsetFixZ - centerZ);
-                    Vector3 checkYA = new Vector3(castPosX, castPosY + centerY - offsetFixY, castPosZ);
-                    Vector3 checkYB = new Vector3(castPosX, castPosY - centerY + offsetFixY, castPosZ);
-
-                    collXB = false;
-                    collXA = false;
-                    collZB = false;
-                    collZA = false;
-                    collYB = false;
-                    collYA = false;
-
-                    float offsetToMoveXA = ZERO_F;
-                    float offsetToMoveXB = ZERO_F;
-                    float offsetToMoveZA = ZERO_F;
-                    float offsetToMoveZB = ZERO_F;
-                    float offsetToMoveYA = ZERO_F;
-                    float offsetToMoveYB = ZERO_F;
-
-                    if (GlobalMapEditor.OverlapDetection)
-                    {
-                        RaycastHit lineHit;
-                        if (Physics.Linecast(castFullPos + new Vector3(0, 0, offsetFixZ), checkZB, out lineHit))
-                        {
-                            offsetToMoveZB = Mathf.Abs(Mathf.Round((Mathf.Abs(Mathf.Abs(lineHit.point.z) - Mathf.Abs(currentTile.transform.position.z))) - (currentTile.GetComponent<Collider>().bounds.size.z / 2.0f)));
-                            collZB = true;
-                        }
-
-                        if (Physics.Linecast(castFullPos + new Vector3(0, 0, -offsetFixZ), checkZA, out lineHit))
-                        {
-                            offsetToMoveZA = Mathf.Abs(Mathf.Round((Mathf.Abs(Mathf.Abs(lineHit.point.z) - Mathf.Abs(currentTile.transform.position.z))) - (currentTile.GetComponent<Collider>().bounds.size.z / 2.0f)));
-                            collZA = true;
-                        }
-
-                        if (Physics.Linecast(castFullPos + new Vector3(0, offsetFixY, 0), checkYB, out lineHit))
-                        {
-                            offsetToMoveYB = Mathf.Abs(Mathf.Round((Mathf.Abs(Mathf.Abs(lineHit.point.y) - Mathf.Abs(currentTile.transform.position.y))) - (currentTile.GetComponent<Collider>().bounds.size.y / 2.0f)));
-                            collYB = true;
-                        }
-
-                        if (Physics.Linecast(castFullPos + new Vector3(0, -offsetFixY, 0), checkYA, out lineHit))
-                        {
-                            offsetToMoveYA = Mathf.Abs(Mathf.Round((Mathf.Abs(Mathf.Abs(lineHit.point.y) - Mathf.Abs(currentTile.transform.position.y))) - (currentTile.GetComponent<Collider>().bounds.size.y / 2.0f)));
-                            collYA = true;
-                        }
-
-                        if (Physics.Linecast(castFullPos + new Vector3(offsetFixX, 0, 0), checkXB, out lineHit))
-                        {
-                            offsetToMoveXB = Mathf.Abs(Mathf.Round((Mathf.Abs(Mathf.Abs(lineHit.point.x) - Mathf.Abs(currentTile.transform.position.x))) - (currentTile.GetComponent<Collider>().bounds.size.x / 2.0f)));
-                            collXB = true;
-                        }
-
-                        if (Physics.Linecast(castFullPos + new Vector3(-offsetFixX, 0, 0), checkXA, out lineHit))
-                        {
-                            offsetToMoveXA = Mathf.Abs(Mathf.Round((Mathf.Abs(Mathf.Abs(lineHit.point.x) - Mathf.Abs(currentTile.transform.position.x))) - (currentTile.GetComponent<Collider>().bounds.size.x / 2.0f)));
-                            collXA = true;
-                        }
-
-                        bool fixingY = false;
-
-                        if (collYA || collYB)
-                        {
-                            if (collYA && !collYB)
-                            {
-                                offsetY -= offsetToMoveYA;
-                                fixingY = true;
-                            }
-                            else if (collYB && !collYA)
-                            {
-                                offsetY += offsetToMoveYB;
-                                fixingY = true;
-                            }
-                        }
-
-                        if (!fixingY)
-                        {
-                            if (collZA || collZB)
-                            {
-                                if (collZA && !collZB)
-                                {
-                                    offsetZ -= offsetToMoveZA;
-                                }
-                                else if (collZB && !collZA)
-                                {
-                                    offsetZ += offsetToMoveZB;
-                                }
-                            }
-
-                            if (collXA || collXB)
-                            {
-                                if (collXA && !collXB)
-                                {
-                                    offsetX -= offsetToMoveXA;
-                                }
-                                else if (collXB && !collXA)
-                                {
-                                    offsetX += offsetToMoveXB;
-                                }
-                            }
-                        }
-                    }
-
-                    float posX = (Mathf.Round(((buildHit.point.x + normalX))) + internalOffsetX);//-(currentTile.GetComponent<BoxCollider>().center.x*currentTile.transform.localScale.x)));
-                    float posZ = (Mathf.Round(((buildHit.point.z + normalZ))) + internalOffsetZ);//-(currentTile.GetComponent<BoxCollider>().center.z*currentTile.transform.localScale.z)));
-                    float posY = 0.0f;
-
-                    if (buildHit.normal == Vector3.up)
-                    {
-                        //Debug.Log("("+buildHit.point.y+"+("+currentTile.collider.bounds.size.y+"/2.0f))-"+currentTile.GetComponent<BoxCollider>().center.y+"0.0000001f");;
-                        posY = (buildHit.point.y + (currentTile.GetComponent<Collider>().bounds.size.y / 2.0f)) - (currentTile.GetComponent<BoxCollider>().center.y * currentTile.transform.localScale.y) + 0.000001f;//posY = (Mathf.Round(buildHit.point.y+normalY)+internalOffsetY);
-                                                                                                                                                                                                                      //Debug.Log(posY);
-                    }
-                    else
-                    {
-                        if (currentTile.name.Equals(buildHit.collider.gameObject.name))
-                        {
-                            posY = buildHit.collider.gameObject.transform.position.y;
-                        }
-                        else
-                        {
-                            posY = 0.1f * ((Mathf.Round((buildHit.point.y + normalY) * 10.0f)) + internalOffsetY);
-                        }
-                    }
-
-                    if (Mathf.Abs(lastPosX - posX) > 0.09f || Mathf.Abs(lastPosY - posY) > 0.09f || Mathf.Abs(lastPosZ - posZ) > 0.09f)
-                    {
-                        offsetZ = ZERO_F;
-                        offsetX = ZERO_F;
-                        offsetY = ZERO_F;
-                        offsetToMoveXA = ZERO_F;
-                        offsetToMoveXB = ZERO_F;
-                        offsetToMoveZA = ZERO_F;
-                        offsetToMoveZB = ZERO_F;
-                        offsetToMoveYA = ZERO_F;
-                        offsetToMoveYB = ZERO_F;
-                    }
-
-                    lastPosX = posX;
-                    lastPosY = posY;
-                    lastPosZ = posZ;
-
-                    float finalPosY = posY + offsetY;// * 100.0f);
-                    posX = (posX + offsetX);// * 100.0f);
-                    posZ = (posZ + offsetZ);// * 100.0f);
-                    float addOnTop = 0.0f;
-
-                    if (currentTile.GetComponent<Collider>().bounds.size.y < 0.011f)
-                    {
-                        addOnTop = 0.002f;
-                    }
-
-                    Vector3 calculatedPosition = new Vector3(buildHit.point.x, finalPosY + addOnTop, buildHit.point.z);
-                    calculatedPosition += customTileOffset;
-
-                    cameraMove.sel = calculatedPosition;
-
-                    if (((collZA && collZB) || (collXA && collXB) || (collYA && collYB)) || (!collZA && !collZB && !collXA && !collXB && !collYA && !collYB))
-                    {
-                        currentTile.transform.position = calculatedPosition;
-                    }
-
-                    currentTile.transform.position = calculatedPosition;
-
-                    if (((collZA && collZB) || (collZA || collZB)) || ((collXA && collXB) || (collXA || collXB)) || ((collYA && collYB) || (collYA || collYB)))
-                    {
-                        canBuild = false;
-                    }
-                    else if (!GlobalMapEditor.canBuild)
-                    {
-                        canBuild = true;
-                    }
-                    else
-                    {
-                        canBuild = true;
-                    }
+                if (castSizeX == castSizeZ)
+                {
+                    castSizeSide = castSizeX;
+                }
+                else if (castSizeX > castSizeZ)
+                {
+                    castSizeSide = castSizeX;
                 }
                 else
                 {
-                    canBuild = false;
+                    castSizeSide = castSizeZ;
                 }
-            }
-            else
-            {
-                canBuild = false;
+
+                float normalX = ZERO_F;
+                float normalZ = ZERO_F;
+                float normalY = ZERO_F;
+
+
+                if (buildHit.normal.y == ZERO_F)
+                {
+                    if ((int)buildHit.normal.x > ZERO_F)
+                    {
+                        normalX = 0.5f;
+                    }
+                    else if ((int)buildHit.normal.x < ZERO_F)
+                    {
+                        normalX = -0.5f;
+                    }
+
+                    if ((int)buildHit.normal.z > ZERO_F)
+                    {
+                        normalZ = 0.5f;
+                    }
+                    else if ((int)buildHit.normal.z < ZERO_F)
+                    {
+                        normalZ = -0.5f;
+                    }
+                }
+
+
+                if (buildHit.normal.y > ZERO_F)
+                {
+                    normalY = 0.5f;
+                }
+                else if (buildHit.normal.y < ZERO_F)
+                {
+                    normalY = -0.5f;
+                }
+
+                float internalOffsetX = ZERO_F;
+                float internalOffsetZ = ZERO_F;
+                float internalOffsetY = ZERO_F;
+
+                if (Mathf.Round(currentTile.GetComponent<Collider>().bounds.size.z) % 2 == 0)
+                {
+                    internalOffsetZ = 0.5f;
+                }
+
+                if (Mathf.Round(currentTile.GetComponent<Collider>().bounds.size.x) % 2 == 0)
+                {
+                    internalOffsetX = 0.5f;
+                }
+
+                if (Mathf.Round(currentTile.GetComponent<Collider>().bounds.size.y) % 2 == 0)
+                {
+                    internalOffsetY = 0.5f;
+                }
+
+                float posY = 0.0f;
+
+                if (buildHit.normal == Vector3.up)
+                {
+                    posY = (buildHit.point.y + (currentTile.GetComponent<Collider>().bounds.size.y / 2.0f)) - (currentTile.GetComponent<BoxCollider>().center.y * currentTile.transform.localScale.y) + 0.000001f;
+                }
+                else
+                {
+                    if (currentTile.name.Equals(buildHit.collider.gameObject.name))
+                    {
+                        posY = buildHit.collider.gameObject.transform.position.y;
+                    }
+                    else
+                    {
+                        posY = 0.1f * ((Mathf.Round((buildHit.point.y + normalY) * 10.0f)) + internalOffsetY);
+                    }
+                }
+
+                VoxelPos finalPos = new VoxelPos(buildHit.point.x, posY, buildHit.point.z);
+                currentTile.transform.position = finalPos.ToVector3();
+
+                // TODO: 鼠标所指位置不存在已有方块
+                canBuild = true;
             }
 
             if (canBuild)
@@ -1064,7 +873,6 @@ public class MapEditorEngine : MonoBehaviour
         {
             newObj.layer = 0;
             Destroy(newObj.GetComponent<Rigidbody>());
-            Destroy(newObj.GetComponent<DetectBuildCollision>());
             newObj.GetComponent<Collider>().isTrigger = false;
 
             if (GlobalMapEditor.UndoSession == 2 || (GlobalMapEditor.UndoSession == 1))
@@ -1244,7 +1052,7 @@ public class MapEditorEngine : MonoBehaviour
                 cObjs_newlist.Add(cObjs[newIndexs[x]]);
             }
 
-            allTiles.Add(new catInfo(cName, cObjsNames, cObjs_newlist, cObjsP_newlist, cObjsIDs_newlist, cObjsPaths_newlist));
+            allTiles.Add(new CatInfo(cName, cObjsNames, cObjs_newlist, cObjsP_newlist, cObjsIDs_newlist, cObjsPaths_newlist));
             #endregion
         }
 
@@ -1258,7 +1066,7 @@ public class MapEditorEngine : MonoBehaviour
         cameraMove.cameraSensitivity = cameraSensitivity;
 
         GameObject _grid = (GameObject)Resources.Load("uteForEditor/uteLayer");
-        grid = Instantiate(_grid, new Vector3((gridsize.x / 2) + 0.5f, 0.0f, (gridsize.z / 2) + 0.5f), _grid.transform.rotation);
+        grid = Instantiate(_grid, new Vector3((gridsize.x / 2) + 0.5f, -0.5f, (gridsize.z / 2) + 0.5f), _grid.transform.rotation);
         grid.name = "Grid";
         grid.SetActive(true);
         if (globalGridSizeX % 2.0f != 0.0f)
@@ -1958,12 +1766,10 @@ public class MapEditorEngine : MonoBehaviour
                     currentTile.GetComponent<BoxCollider>().size -= new Vector3(0.0000001f, 0.0000001f, 0.0000001f);
                     currentTile.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ;
                     currentTile.GetComponent<Collider>().isTrigger = true;
-                    currentTile.AddComponent<DetectBuildCollision>();
                     currentTile.layer = 2;
                     currentObjectID = currentCatName.ToString();
                     currentTile.name = currentObjectID;
                     currentObjectGUID = currentCatGuid.ToString();
-                    customTileOffset = Vector3.zero;
 
                     helpers_CANTBUILD.transform.position = new Vector3(-1000, 0, -1000);
                     helpers_CANTBUILD.transform.localScale = currentTile.GetComponent<Collider>().bounds.size + new Vector3(0.1f, 0.1f, 0.1f);
@@ -1993,7 +1799,7 @@ public class MapEditorEngine : MonoBehaviour
         }
         else
         {
-            using (catInfo FilteredCatInfo = new catInfo(allTiles[selectedCategoryIndex].catName))
+            using (CatInfo FilteredCatInfo = new CatInfo(allTiles[selectedCategoryIndex].catName))
             {
                 FilteredCatInfo.catObjs = new List<GameObject>();
                 FilteredCatInfo.catObjsPrevs = new List<Texture2D>();
