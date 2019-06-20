@@ -46,7 +46,7 @@ namespace VoxelFramework
         public override void OnBlockPlace(VoxelInfo voxelInfo)
         {
             // if the block below is grass, change it to dirt
-            Index indexBelow = new Index(voxelInfo.index.x, voxelInfo.index.y - 1, voxelInfo.index.z);
+            VoxelPos indexBelow = new VoxelPos(voxelInfo.index.x, voxelInfo.index.y - 1, voxelInfo.index.z);
 
             if (voxelInfo.GetVoxelType().VTransparency == Transparency.solid
             && voxelInfo.chunk.GetVoxel(indexBelow) == 2)
@@ -58,7 +58,7 @@ namespace VoxelFramework
         public override void OnBlockDestroy(VoxelInfo voxelInfo)
         {
             // if the block above is tall grass, destroy it
-            Index indexAbove = new Index(voxelInfo.index.x, voxelInfo.index.y + 1, voxelInfo.index.z);
+            VoxelPos indexAbove = new VoxelPos(voxelInfo.index.x, voxelInfo.index.y + 1, voxelInfo.index.z);
 
             if (voxelInfo.chunk.GetVoxel(indexAbove) == 8)
             {

@@ -1,6 +1,5 @@
-using UnityEngine;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine;
 
 namespace VoxelFramework
 {
@@ -14,7 +13,7 @@ namespace VoxelFramework
         /// </summary>
         public ushort[] VoxelData;
 
-        public Index ChunkIndex; // corresponds to the position of the chunk
+        public VoxelPos ChunkIndex; // corresponds to the position of the chunk
         public Chunk[] NeighborChunks; // references to GameObjects of neighbor chunks
 
         /// <summary>
@@ -51,7 +50,7 @@ namespace VoxelFramework
         { // chunk initialization (load/generate data, set position, etc.)
 
             // Set variables
-            ChunkIndex = new Index(transform.position);
+            ChunkIndex = new VoxelPos(transform.position);
             SideLength = Engine.ChunkSideLength;
             SquaredSideLength = SideLength * SideLength;
             NeighborChunks = new Chunk[6]; // 0 = up, 1 = down, 2 = right, 3 = left, 4 = forward, 5 = back
@@ -153,7 +152,7 @@ namespace VoxelFramework
         {
             VoxelData[(z * SquaredSideLength) + (y * SideLength) + x] = data;
         }
-        public void SetVoxelSimple(Index index, ushort data)
+        public void SetVoxelSimple(VoxelPos index, ushort data)
         {
             VoxelData[(index.z * SquaredSideLength) + (index.y * SideLength) + index.x] = data;
         }
@@ -163,33 +162,33 @@ namespace VoxelFramework
             // if outside of this chunk, change in neighbor instead (if possible)
             if (x < 0)
             {
-                if (NeighborChunks[(int)Direction.left] != null)
-                    NeighborChunks[(int)Direction.left].SetVoxel(x + SideLength, y, z, data, updateMesh); return;
+                if (NeighborChunks[(int)CubeDirection.left] != null)
+                    NeighborChunks[(int)CubeDirection.left].SetVoxel(x + SideLength, y, z, data, updateMesh); return;
             }
             else if (x >= SideLength)
             {
-                if (NeighborChunks[(int)Direction.right] != null)
-                    NeighborChunks[(int)Direction.right].SetVoxel(x - SideLength, y, z, data, updateMesh); return;
+                if (NeighborChunks[(int)CubeDirection.right] != null)
+                    NeighborChunks[(int)CubeDirection.right].SetVoxel(x - SideLength, y, z, data, updateMesh); return;
             }
             else if (y < 0)
             {
-                if (NeighborChunks[(int)Direction.down] != null)
-                    NeighborChunks[(int)Direction.down].SetVoxel(x, y + SideLength, z, data, updateMesh); return;
+                if (NeighborChunks[(int)CubeDirection.down] != null)
+                    NeighborChunks[(int)CubeDirection.down].SetVoxel(x, y + SideLength, z, data, updateMesh); return;
             }
             else if (y >= SideLength)
             {
-                if (NeighborChunks[(int)Direction.up] != null)
-                    NeighborChunks[(int)Direction.up].SetVoxel(x, y - SideLength, z, data, updateMesh); return;
+                if (NeighborChunks[(int)CubeDirection.up] != null)
+                    NeighborChunks[(int)CubeDirection.up].SetVoxel(x, y - SideLength, z, data, updateMesh); return;
             }
             else if (z < 0)
             {
-                if (NeighborChunks[(int)Direction.back] != null)
-                    NeighborChunks[(int)Direction.back].SetVoxel(x, y, z + SideLength, data, updateMesh); return;
+                if (NeighborChunks[(int)CubeDirection.back] != null)
+                    NeighborChunks[(int)CubeDirection.back].SetVoxel(x, y, z + SideLength, data, updateMesh); return;
             }
             else if (z >= SideLength)
             {
-                if (NeighborChunks[(int)Direction.forward] != null)
-                    NeighborChunks[(int)Direction.forward].SetVoxel(x, y, z - SideLength, data, updateMesh); return;
+                if (NeighborChunks[(int)CubeDirection.forward] != null)
+                    NeighborChunks[(int)CubeDirection.forward].SetVoxel(x, y, z - SideLength, data, updateMesh); return;
             }
 
             VoxelData[(z * SquaredSideLength) + (y * SideLength) + x] = data;
@@ -200,7 +199,7 @@ namespace VoxelFramework
                 FlagToUpdate();
             }
         }
-        public void SetVoxel(Index index, ushort data, bool updateMesh)
+        public void SetVoxel(VoxelPos index, ushort data, bool updateMesh)
         {
             SetVoxel(index.x, index.y, index.z, data, updateMesh);
         }
@@ -214,7 +213,7 @@ namespace VoxelFramework
         {
             return VoxelData[(z * SquaredSideLength) + (y * SideLength) + x];
         }
-        public ushort GetVoxelSimple(Index index)
+        public ushort GetVoxelSimple(VoxelPos index)
         {
             return VoxelData[(index.z * SquaredSideLength) + (index.y * SideLength) + index.x];
         }
@@ -222,49 +221,49 @@ namespace VoxelFramework
         {
             if (x < 0)
             {
-                if (NeighborChunks[(int)Direction.left] != null)
+                if (NeighborChunks[(int)CubeDirection.left] != null)
                 {
-                    return NeighborChunks[(int)Direction.left].GetVoxel(x + SideLength, y, z);
+                    return NeighborChunks[(int)CubeDirection.left].GetVoxel(x + SideLength, y, z);
                 }
                 else return ushort.MaxValue;
             }
             else if (x >= SideLength)
             {
-                if (NeighborChunks[(int)Direction.right] != null)
+                if (NeighborChunks[(int)CubeDirection.right] != null)
                 {
-                    return NeighborChunks[(int)Direction.right].GetVoxel(x - SideLength, y, z);
+                    return NeighborChunks[(int)CubeDirection.right].GetVoxel(x - SideLength, y, z);
                 }
                 else return ushort.MaxValue;
             }
             else if (y < 0)
             {
-                if (NeighborChunks[(int)Direction.down] != null)
+                if (NeighborChunks[(int)CubeDirection.down] != null)
                 {
-                    return NeighborChunks[(int)Direction.down].GetVoxel(x, y + SideLength, z);
+                    return NeighborChunks[(int)CubeDirection.down].GetVoxel(x, y + SideLength, z);
                 }
                 else return ushort.MaxValue;
             }
             else if (y >= SideLength)
             {
-                if (NeighborChunks[(int)Direction.up] != null)
+                if (NeighborChunks[(int)CubeDirection.up] != null)
                 {
-                    return NeighborChunks[(int)Direction.up].GetVoxel(x, y - SideLength, z);
+                    return NeighborChunks[(int)CubeDirection.up].GetVoxel(x, y - SideLength, z);
                 }
                 else return ushort.MaxValue;
             }
             else if (z < 0)
             {
-                if (NeighborChunks[(int)Direction.back] != null)
+                if (NeighborChunks[(int)CubeDirection.back] != null)
                 {
-                    return NeighborChunks[(int)Direction.back].GetVoxel(x, y, z + SideLength);
+                    return NeighborChunks[(int)CubeDirection.back].GetVoxel(x, y, z + SideLength);
                 }
                 else return ushort.MaxValue;
             }
             else if (z >= SideLength)
             {
-                if (NeighborChunks[(int)Direction.forward] != null)
+                if (NeighborChunks[(int)CubeDirection.forward] != null)
                 {
-                    return NeighborChunks[(int)Direction.forward].GetVoxel(x, y, z - SideLength);
+                    return NeighborChunks[(int)CubeDirection.forward].GetVoxel(x, y, z - SideLength);
                 }
                 else return ushort.MaxValue;
             }
@@ -273,7 +272,7 @@ namespace VoxelFramework
                 return VoxelData[(z * SquaredSideLength) + (y * SideLength) + x];
             }
         }
-        public ushort GetVoxel(Index index)
+        public ushort GetVoxel(VoxelPos index)
         {
             return GetVoxel(index.x, index.y, index.z);
         }
@@ -347,7 +346,7 @@ namespace VoxelFramework
                 Debug.LogWarning("Uniblocks: Saving is disabled. You can enable it in the Engine Settings.");
                 return;
             }
-            
+
             GetComponent<ChunkDataFiles>().SaveData();
         }
 
@@ -401,26 +400,26 @@ namespace VoxelFramework
 
         }
 
-        public Index GetAdjacentIndex(Index index, Direction direction)
+        public VoxelPos GetAdjacentIndex(VoxelPos index, CubeDirection direction)
         {
             return GetAdjacentIndex(index.x, index.y, index.z, direction);
         }
 
-        public Index GetAdjacentIndex(int x, int y, int z, Direction direction)
+        public VoxelPos GetAdjacentIndex(int x, int y, int z, CubeDirection direction)
         { // converts x,y,z, direction into a specific index
 
-            if (direction == Direction.down) return new Index(x, y - 1, z);
-            else if (direction == Direction.up) return new Index(x, y + 1, z);
-            else if (direction == Direction.left) return new Index(x - 1, y, z);
-            else if (direction == Direction.right) return new Index(x + 1, y, z);
-            else if (direction == Direction.back) return new Index(x, y, z - 1);
-            else if (direction == Direction.forward) return new Index(x, y, z + 1);
+            if (direction == CubeDirection.down) return new VoxelPos(x, y - 1, z);
+            else if (direction == CubeDirection.up) return new VoxelPos(x, y + 1, z);
+            else if (direction == CubeDirection.left) return new VoxelPos(x - 1, y, z);
+            else if (direction == CubeDirection.right) return new VoxelPos(x + 1, y, z);
+            else if (direction == CubeDirection.back) return new VoxelPos(x, y, z - 1);
+            else if (direction == CubeDirection.forward) return new VoxelPos(x, y, z + 1);
 
 
             else
             {
                 Debug.LogError("Chunk.GetAdjacentIndex failed! Returning default index.");
-                return new Index(x, y, z);
+                return new VoxelPos(x, y, z);
             }
         }
 
@@ -428,34 +427,34 @@ namespace VoxelFramework
         public void UpdateNeighborsIfNeeded(int x, int y, int z)
         { // if the index lies at the border of a chunk, FlagToUpdate the neighbor at that border
 
-            if (x == 0 && NeighborChunks[(int)Direction.left] != null)
+            if (x == 0 && NeighborChunks[(int)CubeDirection.left] != null)
             {
-                NeighborChunks[(int)Direction.left].GetComponent<Chunk>().FlagToUpdate();
+                NeighborChunks[(int)CubeDirection.left].GetComponent<Chunk>().FlagToUpdate();
             }
 
-            else if (x == SideLength - 1 && NeighborChunks[(int)Direction.right] != null)
+            else if (x == SideLength - 1 && NeighborChunks[(int)CubeDirection.right] != null)
             {
-                NeighborChunks[(int)Direction.right].GetComponent<Chunk>().FlagToUpdate();
+                NeighborChunks[(int)CubeDirection.right].GetComponent<Chunk>().FlagToUpdate();
             }
 
-            if (y == 0 && NeighborChunks[(int)Direction.down] != null)
+            if (y == 0 && NeighborChunks[(int)CubeDirection.down] != null)
             {
-                NeighborChunks[(int)Direction.down].GetComponent<Chunk>().FlagToUpdate();
+                NeighborChunks[(int)CubeDirection.down].GetComponent<Chunk>().FlagToUpdate();
             }
 
-            else if (y == SideLength - 1 && NeighborChunks[(int)Direction.up] != null)
+            else if (y == SideLength - 1 && NeighborChunks[(int)CubeDirection.up] != null)
             {
-                NeighborChunks[(int)Direction.up].GetComponent<Chunk>().FlagToUpdate();
+                NeighborChunks[(int)CubeDirection.up].GetComponent<Chunk>().FlagToUpdate();
             }
 
-            if (z == 0 && NeighborChunks[(int)Direction.back] != null)
+            if (z == 0 && NeighborChunks[(int)CubeDirection.back] != null)
             {
-                NeighborChunks[(int)Direction.back].GetComponent<Chunk>().FlagToUpdate();
+                NeighborChunks[(int)CubeDirection.back].GetComponent<Chunk>().FlagToUpdate();
             }
 
-            else if (z == SideLength - 1 && NeighborChunks[(int)Direction.forward] != null)
+            else if (z == SideLength - 1 && NeighborChunks[(int)CubeDirection.forward] != null)
             {
-                NeighborChunks[(int)Direction.forward].GetComponent<Chunk>().FlagToUpdate();
+                NeighborChunks[(int)CubeDirection.forward].GetComponent<Chunk>().FlagToUpdate();
             }
         }
 
@@ -463,13 +462,13 @@ namespace VoxelFramework
         // ==== position / voxel index =======================================================================================
 
 
-        public Index PositionToVoxelIndex(Vector3 position)
+        public VoxelPos PositionToVoxelIndex(Vector3 position)
         {
 
             Vector3 point = transform.InverseTransformPoint(position);
 
             // round it to get an int which we can convert to the voxel index
-            Index index = new Index(0, 0, 0);
+            VoxelPos index = new VoxelPos(0, 0, 0);
             index.x = Mathf.RoundToInt(point.x);
             index.y = Mathf.RoundToInt(point.y);
             index.z = Mathf.RoundToInt(point.z);
@@ -477,7 +476,7 @@ namespace VoxelFramework
             return index;
         }
 
-        public Vector3 VoxelIndexToPosition(Index index)
+        public Vector3 VoxelIndexToPosition(VoxelPos index)
         {
 
             Vector3 localPoint = index.ToVector3(); // convert index to chunk's local position
@@ -492,7 +491,7 @@ namespace VoxelFramework
             return transform.TransformPoint(localPoint);// convert local position to world space
         }
 
-        public Index PositionToVoxelIndex(Vector3 position, Vector3 normal, bool returnAdjacent)
+        public VoxelPos PositionToVoxelIndex(Vector3 position, Vector3 normal, bool returnAdjacent)
         { // converts the absolute position to the index of the voxel
 
             if (returnAdjacent == false)
@@ -510,7 +509,7 @@ namespace VoxelFramework
 
 
             // round it to get an int which we can convert to the voxel index
-            Index index = new Index(0, 0, 0);
+            VoxelPos index = new VoxelPos(0, 0, 0);
             index.x = Mathf.RoundToInt(point.x);
             index.y = Mathf.RoundToInt(point.y);
             index.z = Mathf.RoundToInt(point.z);

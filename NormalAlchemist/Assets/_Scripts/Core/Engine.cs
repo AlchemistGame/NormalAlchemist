@@ -1,17 +1,11 @@
-using UnityEngine;
-using System.Collections;
 using System.Collections.Generic;
-using System.IO;
+using UnityEngine;
 
 namespace VoxelFramework
 {
 
     // enums
     public enum Facing
-    {
-        up, down, right, left, forward, back
-    }
-    public enum Direction
     {
         up, down, right, left, forward, back
     }
@@ -34,7 +28,7 @@ namespace VoxelFramework
         mesh,
         // 生成一个 cube Trigger( 一种特殊的 collider ), 仍能监测到其他 collider enters its space 的情况, 并触发脚本里的 OnTriggerEnter 事件,
         // 但不会产生物理层面的碰撞
-        none, 
+        none,
     }
 
 
@@ -109,7 +103,7 @@ namespace VoxelFramework
 
             WorldName = lWorldName;
             UpdateWorldPath();
-            
+
             Engine.Blocks = lBlocks;
 
             TargetFPS = lTargetFPS;
@@ -266,7 +260,7 @@ namespace VoxelFramework
             try
             {
                 if (voxelId == ushort.MaxValue) voxelId = 0;
-                Voxel voxel = Engine.Blocks[(int)voxelId].GetComponent<Voxel>();
+                Voxel voxel = Engine.Blocks[voxelId].GetComponent<Voxel>();
                 if (voxel == null)
                 {
                     Debug.LogError("Uniblocks: Voxel id " + voxelId + " does not have the Voxel component attached!");
@@ -307,7 +301,7 @@ namespace VoxelFramework
                         hitObject = hitObject.transform.parent.gameObject; // swap the mesh container for the actual chunk object
                     }
 
-                    Index hitIndex = hitObject.GetComponent<Chunk>().PositionToVoxelIndex(hit.point, hit.normal, false);
+                    VoxelPos hitIndex = hitObject.GetComponent<Chunk>().PositionToVoxelIndex(hit.point, hit.normal, false);
 
                     if (ignoreTransparent)
                     { // punch through transparent voxels by raycasting again when a transparent voxel is hit
@@ -346,9 +340,9 @@ namespace VoxelFramework
 
 
 
-        public static Index PositionToChunkIndex(Vector3 position)
+        public static VoxelPos PositionToChunkIndex(Vector3 position)
         {
-            Index chunkIndex = new Index(Mathf.RoundToInt(position.x / Engine.ChunkScale.x) / Engine.ChunkSideLength,
+            VoxelPos chunkIndex = new VoxelPos(Mathf.RoundToInt(position.x / Engine.ChunkScale.x) / Engine.ChunkSideLength,
                                           Mathf.RoundToInt(position.y / Engine.ChunkScale.y) / Engine.ChunkSideLength,
                                           Mathf.RoundToInt(position.z / Engine.ChunkScale.z) / Engine.ChunkSideLength);
             return chunkIndex;
@@ -356,7 +350,7 @@ namespace VoxelFramework
 
         public static GameObject PositionToChunk(Vector3 position)
         {
-            Index chunkIndex = new Index(Mathf.RoundToInt(position.x / Engine.ChunkScale.x) / Engine.ChunkSideLength,
+            VoxelPos chunkIndex = new VoxelPos(Mathf.RoundToInt(position.x / Engine.ChunkScale.x) / Engine.ChunkSideLength,
                                           Mathf.RoundToInt(position.y / Engine.ChunkScale.y) / Engine.ChunkSideLength,
                                           Mathf.RoundToInt(position.z / Engine.ChunkScale.z) / Engine.ChunkSideLength);
             return ChunkManager.GetChunk(chunkIndex);
@@ -369,7 +363,7 @@ namespace VoxelFramework
             if (chunkObject != null)
             {
                 Chunk chunk = chunkObject.GetComponent<Chunk>();
-                Index voxelIndex = chunk.PositionToVoxelIndex(position);
+                VoxelPos voxelIndex = chunk.PositionToVoxelIndex(position);
                 return new VoxelInfo(voxelIndex, chunk);
             }
             else

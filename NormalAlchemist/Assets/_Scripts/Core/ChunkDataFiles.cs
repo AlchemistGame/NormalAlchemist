@@ -134,7 +134,7 @@ namespace VoxelFramework
         }
 
         // returns the chunk data (from memory or from file), or an empty string if data can't be found
-        private string GetChunkData(Index index)
+        private string GetChunkData(VoxelPos index)
         {
             // try to load from TempChunkData
             string indexString = index.ToString();
@@ -155,15 +155,15 @@ namespace VoxelFramework
         }
 
         // writes the chunk data to the TempChunkData dictionary
-        private void WriteChunkData(Index index, string data)
+        private void WriteChunkData(VoxelPos index, string data)
         {
             TempChunkData[index.ToString()] = data;
         }
 
         // returns the 1d index of a chunk's data in the region file
-        private static int GetChunkRegionIndex(Index index)
+        private static int GetChunkRegionIndex(VoxelPos index)
         {
-            Index newIndex = new Index(index.x, index.y, index.z);
+            VoxelPos newIndex = new VoxelPos(index.x, index.y, index.z);
             if (newIndex.x < 0) newIndex.x = -newIndex.x - 1;
             if (newIndex.y < 0) newIndex.y = -newIndex.y - 1;
             if (newIndex.z < 0) newIndex.z = -newIndex.z - 1;
@@ -179,7 +179,7 @@ namespace VoxelFramework
         }
 
         // loads region data and from file returns it, or returns null if region file is not found
-        private static string[] GetRegionData(Index regionIndex)
+        private static string[] GetRegionData(VoxelPos regionIndex)
         {
             if (LoadRegionData(regionIndex) == true)
             {
@@ -192,7 +192,7 @@ namespace VoxelFramework
         }
 
         // loads the region data into memory if file exists and it's not already loaded, returns true if data exists (and is loaded), else false
-        private static bool LoadRegionData(Index regionIndex)
+        private static bool LoadRegionData(VoxelPos regionIndex)
         {
             string indexString = regionIndex.ToString();
 
@@ -220,7 +220,7 @@ namespace VoxelFramework
             return true; // return true if data is already loaded
         }
 
-        private static string GetRegionPath(Index regionIndex)
+        private static string GetRegionPath(VoxelPos regionIndex)
         {
 
             return Engine.WorldPath + (regionIndex.ToString() + ",.region");
@@ -232,9 +232,9 @@ namespace VoxelFramework
         /// </summary>
         /// <param name="index"> chunk index </param>
         /// <returns></returns>
-        private static Index GetParentRegion(Index index)
+        private static VoxelPos GetParentRegion(VoxelPos index)
         {
-            Index newIndex = new Index(index.x, index.y, index.z);
+            VoxelPos newIndex = new VoxelPos(index.x, index.y, index.z);
 
             if (index.x < 0) newIndex.x -= 9;
             if (index.y < 0) newIndex.y -= 9;
@@ -244,10 +244,10 @@ namespace VoxelFramework
             int y = newIndex.y / 10;
             int z = newIndex.z / 10;
 
-            return new Index(x, y, z);
+            return new VoxelPos(x, y, z);
         }
 
-        private static void CreateRegionFile(Index index)
+        private static void CreateRegionFile(VoxelPos index)
         { // creates an empty region file
 
             Directory.CreateDirectory(Engine.WorldPath);
@@ -327,7 +327,7 @@ namespace VoxelFramework
             // for every chunk loaded in dictionary
             foreach (string chunkIndex in TempChunkData.Keys)
             {
-                Index index = Index.FromString(chunkIndex);
+                VoxelPos index = VoxelPos.FromString(chunkIndex);
                 string region = GetParentRegion(index).ToString();
 
                 // check if region is loaded, and load it if it's not
@@ -357,7 +357,7 @@ namespace VoxelFramework
 
             string[] regionData = LoadedRegions[regionIndex];
 
-            StreamWriter writer = new StreamWriter(GetRegionPath(Index.FromString(regionIndex)));
+            StreamWriter writer = new StreamWriter(GetRegionPath(VoxelPos.FromString(regionIndex)));
             int count = 0;
             foreach (string chunk in regionData)
             {

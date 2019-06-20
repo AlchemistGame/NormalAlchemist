@@ -499,6 +499,7 @@ MonoBehaviour:
   notReady: 1
   newProjectName: 
   isItLoad: 0
+  isMapLoaded: 0
   mapLightGO: {fileID: 0}
   grid: {fileID: 0}
 --- !u!4 &173375314

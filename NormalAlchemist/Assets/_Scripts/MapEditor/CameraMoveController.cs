@@ -15,8 +15,6 @@ public class CameraMoveController : MonoBehaviour
     [HideInInspector]
     public bool is2D;
     [HideInInspector]
-    public Vector3 sel;
-    [HideInInspector]
     public bool isInTopView;
     private bool isMiddleButtonPressed;
     private Vector2 startDrag;
@@ -26,7 +24,6 @@ public class CameraMoveController : MonoBehaviour
     private bool canDragAround;
     private Vector3 hitPoint;
     private bool isRightButtonPressed;
-    private bool isIOSdetected;
     [HideInInspector]
     public float cameraSensitivity = 1.0f;
 
@@ -47,7 +44,6 @@ public class CameraMoveController : MonoBehaviour
         rR = false;
         mS = 0.3f;
         rS = 70.0f;
-        sel = new Vector3(500.0f, 0.0f, 500.0f);
         isInTopView = false;
 
         cam = GameObject.Find("MapEditorCamera").GetComponent<Camera>();

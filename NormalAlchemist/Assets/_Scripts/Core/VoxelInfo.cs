@@ -5,8 +5,8 @@ namespace VoxelFramework {
 
 public class VoxelInfo {
 
-	public Index index;
-	public Index adjacentIndex;
+	public VoxelPos index;
+	public VoxelPos adjacentIndex;
 	
 	public Chunk chunk;
 	
@@ -31,13 +31,13 @@ public class VoxelInfo {
 		this.chunk = setChunk;
 	}
 	
-	public VoxelInfo ( Index setIndex, Chunk setChunk ) {
+	public VoxelInfo ( VoxelPos setIndex, Chunk setChunk ) {
 		this.index = setIndex;
 		
 		this.chunk = setChunk;
 	}
 	
-	public VoxelInfo ( Index setIndex, Index setAdjacentIndex, Chunk setChunk ) {
+	public VoxelInfo ( VoxelPos setIndex, VoxelPos setAdjacentIndex, Chunk setChunk ) {
 		this.index = setIndex;
 		this.adjacentIndex = setAdjacentIndex;
 		
