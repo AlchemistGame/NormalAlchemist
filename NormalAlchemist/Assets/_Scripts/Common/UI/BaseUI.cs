@@ -13,15 +13,6 @@ public class BaseUI : MonoBehaviour
 
     public Enum_BaseUIType UIType = Enum_BaseUIType.Except;
     public Enum_BaseUIShowMode ShowMode = Enum_BaseUIShowMode.Normal;
-    //private static BaseUI instance;
-
-    //public static BaseUI Instance
-    //{
-    //    get
-    //    {
-    //        return instance;
-    //    }
-    //}
 
     public virtual void Awake()
     {

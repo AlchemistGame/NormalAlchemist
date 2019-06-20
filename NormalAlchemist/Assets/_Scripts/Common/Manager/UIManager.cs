@@ -36,7 +36,20 @@ public class UIManager : BaseManager
 
     public List<GameObject> MsgBoxList = new List<GameObject>();
 
-    private GameObject canvas = null;
+    private RectTransform canvas = null;
+    public RectTransform MainCanvas
+    {
+        get
+        {
+            if (canvas== null)
+            {
+                canvas = GameMain.Instance.UIRender.GetComponent<UIRender>().UIMainCanvas.gameObject.GetComponent<RectTransform>();
+            }
+            return canvas;
+        }
+    }
+
+
     private const string strUIRootPath = "Prefabs/UIPrefabs/";
 
     private List<GameObject> ls_LayerList = null;
@@ -52,13 +65,13 @@ public class UIManager : BaseManager
         ls_LayerList = new List<GameObject>();
         //GameObject canvasPrefab = Resources.Load("Base/Canvas") as GameObject;
         //GameObject canvasPrefab = Resources.Load(strUIRootPath + "Canvas") as GameObject;
-        canvas = GetMainCanvas();         //GameObject.Instantiate(canvasPrefab);
+        //canvas = GetMainCanvas();         //GameObject.Instantiate(canvasPrefab);
 
         for (int i = 0; i < i_LayerNum; i++)
         {
             GameObject newLayer = new GameObject("Layer_" + i);
             newLayer.layer = LayerMask.NameToLayer("UI");
-            newLayer.transform.SetParent(canvas.transform, false);
+            newLayer.transform.SetParent(MainCanvas.transform, false);
             newLayer.AddComponent<Canvas>().overrideSorting = true;
             newLayer.GetComponent<Canvas>().sortingLayerName = ("Layer_" + i);
             newLayer.AddComponent<CanvasGroup>();
@@ -945,21 +958,6 @@ public class UIManager : BaseManager
         EmStatus = status;
     }
 
-    public GameObject GetMainCanvas()
-    {
-        if (canvas == null)
-        {
-            canvas = GameMain.Instance.UIRender.GetComponent<UIRender>().UIMainCanvas.gameObject;
-            //canvas = GameObject.Find("Canvas(clone)");
-            //if (canvas == null)
-            //{
-            //    GameObject canvasPrefab = Resources.Load("Base/Canvas") as GameObject;
-            //    canvas = GameObject.Instantiate(canvasPrefab);
-            //}
-        }
-        return canvas;
-    }
-
     public UIRender UIRender
     {
         get
@@ -972,14 +970,14 @@ public class UIManager : BaseManager
     {
         get
         {
-            return Screen.height / GetMainCanvas().GetComponent<RectTransform>().rect.height;
+            return Screen.height / MainCanvas.rect.height;
         }
     }
     public float CanvasScaleY
     {
         get
         {
-            return Screen.width / GetMainCanvas().GetComponent<RectTransform>().rect.width;
+            return Screen.width / MainCanvas.rect.width;
         }
     }
 
@@ -1008,7 +1006,7 @@ public class UIManager : BaseManager
     {
         if (ls_LayerList == null)
         {
-            return GetMainCanvas().transform;
+            return MainCanvas.transform;
         }
         if (lv >= ls_LayerList.Count)
         {
