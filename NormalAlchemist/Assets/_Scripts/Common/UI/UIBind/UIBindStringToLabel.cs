@@ -17,5 +17,8 @@ public class UIBindStringToLabel : UIBindCellBase
         }
     }
 
-
+    public override object GetDefaultObj()
+    {
+        return "这是默认内容";
+    }
 }

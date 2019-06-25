@@ -19,7 +19,7 @@ using UnityEngine;
         {
             _testString = value;
             //这个方法直接生成
-            TryCall("TestString", "CallBindDataStringChange", value);
+            TryCallHandle("TestString", "CallBindStringToText", value);
         }
     }
 }

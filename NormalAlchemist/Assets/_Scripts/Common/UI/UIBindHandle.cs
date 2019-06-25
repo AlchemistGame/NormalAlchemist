@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace NA_UI
+public class UIBindHandle
 {
-    public class UIBindHandle
+    public static void CallFunc(string funcName)
     {
-        public void CallFunc(string funcName)
-        {
-
-        }
-
 
     }
+
+    public static void CallBindStringToText(UIBindCellBase cell,string value)
+    {
+        ((UIBindStringToLabel)cell).LabelText = value;
+    }
+
 }

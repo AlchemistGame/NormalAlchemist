@@ -113,7 +113,7 @@ public class UIManager : BaseManager
         {
             listUI.Clear();
         }
-        GameObject.DestroyObject(canvas);
+        GameObject.Destroy(canvas);
     }
     public override void Update()
     {

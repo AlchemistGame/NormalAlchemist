@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Reflection;
 
 public class BaseModel
 {
@@ -25,8 +26,27 @@ public class BaseModel
             foreach (var i in View.bindCell[key])
             {
                 BaseData sendData = new BaseData(i, value);
-                View.GetType().GetMethod(method).Invoke(View,new object[]{ sendData});
+                View.GetType().GetMethod(method).Invoke(View , new object[]{ sendData});
             }
+        }
+    }
+
+    protected void TryCallHandle(string key, string method, dynamic value)
+    {
+        MethodInfo mi = typeof(UIBindHandle).GetMethod(method);
+        if (mi != null)
+        {
+            if (View.bindCell.ContainsKey(key))
+            {
+                foreach (var i in View.bindCell[key])
+                {
+                    mi.Invoke(default(UIBindHandle), new object[] { i, value });
+                }
+            }
+        }
+        else
+        {
+            Debug.LogError("method "+method+ " in UIBindHandle is Not Declared");
         }
     }
 
