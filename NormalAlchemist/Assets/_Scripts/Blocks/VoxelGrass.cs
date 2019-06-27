@@ -8,7 +8,7 @@ namespace VoxelFramework
         public override void OnBlockPlace(VoxelInfo voxelInfo)
         {
             // switch to dirt if the block above isn't 0
-            VoxelPos adjacentIndex = voxelInfo.chunk.GetAdjacentIndex(voxelInfo.index, CubeDirection.up);
+            VoxelPos adjacentIndex = voxelInfo.chunk.GetAdjacentIndex(voxelInfo.index, Direction.up);
             if (voxelInfo.chunk.GetVoxel(adjacentIndex) != 0)
             {
                 voxelInfo.chunk.SetVoxel(voxelInfo.index, 1, true);

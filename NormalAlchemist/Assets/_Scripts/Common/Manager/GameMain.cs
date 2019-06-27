@@ -1,17 +1,20 @@
-﻿using UnityEngine;
+﻿using System.Collections;
 using System.Collections.Generic;
-using System;
-using System.Collections;
-public class GameMain : MonoBehaviour
+using UnityEngine;
+
+public class GameMain : StateMachine
 {
+    public CameraRig cameraRig;
+    public Point pos;
+
     public static GameMain Instance { get; private set; }
+    public Transform tileSelectionIndicator;
 
     private void Awake()
     {
         Instance = this;
         DontDestroyOnLoad(this);
         DontDestroyOnLoad(UIRender);
-        Screen.sleepTimeout = SleepTimeout.NeverSleep;
 
         StartCoroutine(Splash());
     }
@@ -19,27 +22,29 @@ public class GameMain : MonoBehaviour
     private void Start()
     {
         InitScene();
+
+        ActorManager.Instance.NextTurn();
     }
 
     private void InitScene()
     {
-        ACTOR_INFO enemy_info = new ACTOR_INFO();
+        ActorInfo enemy_info = new ActorInfo();
         enemy_info.name = "Enemy";
         enemy_info.position = new Vector3(0.5f, 0, 8.5f);
         enemy_info.rotation = new Vector3(0, 180, 0);
         ActorManager.Instance.CreateActor("Model/UnityChan", "Enemy", enemy_info);
 
-        ACTOR_INFO player_info = new ACTOR_INFO();
+        ActorInfo player_info = new ActorInfo();
         player_info.name = "Player";
         player_info.position = new Vector3(0.5f, 0, 0.5f);
         player_info.rotation = new Vector3(0, 0, 0);
         ActorManager.Instance.CreateActor("Model/UnityChan", "Friend", player_info);
     }
-    
+
     private List<BaseManager> listManager = null;
 
     public GameObject UIRender = null;
-    
+
     public GameObject splash;
 
     // TODO 在此处添加全局主管理器
@@ -57,7 +62,7 @@ public class GameMain : MonoBehaviour
 
         listManager = new List<BaseManager>();
         listManager.Add(UIManager.Instance);
-        
+
 
 
 
@@ -81,7 +86,7 @@ public class GameMain : MonoBehaviour
             }
         }
     }
-    
+
 
     IEnumerator Splash()
     {
@@ -105,9 +110,8 @@ public class GameMain : MonoBehaviour
         splash = null;
         //LoadingUI.ShowLoadingUI();
         //yield return new WaitUntil(() => LoadingUI.Instance.UIShowStatus == Enum_UIShowStatus.Show);
-        
     }
-    
+
     // Update is called once per frame
     void Update()
     {
@@ -117,7 +121,7 @@ public class GameMain : MonoBehaviour
         {
             bm.Update();
         }
-        
+
     }
 
     public void FixedUpdate()

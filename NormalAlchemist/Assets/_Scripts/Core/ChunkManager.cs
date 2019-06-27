@@ -314,7 +314,7 @@ namespace VoxelFramework
                                             // spawn neighbor chunks
                                             for (int d = 0; d < 6; d++)
                                             {
-                                                VoxelPos neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((CubeDirection)d);
+                                                VoxelPos neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((Direction)d);
                                                 GameObject neighborChunk = GetChunk(neighborIndex);
                                                 if (neighborChunk == null)
                                                 {
@@ -348,7 +348,7 @@ namespace VoxelFramework
                                         // spawn neighbor chunks if they're not spawned yet
                                         for (int d = 0; d < 6; d++)
                                         {
-                                            VoxelPos neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((CubeDirection)d);
+                                            VoxelPos neighborIndex = currentChunk.ChunkIndex.GetAdjacentIndex((Direction)d);
                                             GameObject neighborChunk = GetChunk(neighborIndex);
                                             if (neighborChunk == null)
                                             {

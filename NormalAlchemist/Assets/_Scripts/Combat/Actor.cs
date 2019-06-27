@@ -1,51 +1,40 @@
 ﻿using UnityEngine;
 
-public abstract class Actor
+/// <summary>
+/// 各种角色单位的基类 (怪物, NPC, 玩家)
+/// </summary>
+public class Actor : MonoBehaviour
 {
-    /// <summary>
-    /// 角色名
-    /// </summary>
-    public string name;
-    /// <summary>
-    /// 角色位置
-    /// </summary>
-    public Vector3 position;
-    /// <summary>
-    /// 角色朝向
-    /// </summary>
-    public Vector3 rotation;
+    public int HP = 100;
+
+    // 行动速度
+    public int speed = 100;
+
     /// <summary>
     /// 此角色在场景中对应的物体
     /// </summary>
     public GameObject sceneObject;
 
-    /// <summary>
-    /// 每帧更新状态
-    /// </summary>
-    public abstract void OnUpdate();
-
-    /// <summary>
-    /// 回合开始时调用
-    /// </summary>
-    public abstract void OnTurnBegin();
-
-    /// <summary>
-    /// 回合结束时调用
-    /// </summary>
-    public abstract void OnTurnEnd();
-
-    public virtual void OnMouseEnter()
+    public bool isDead
     {
-        // 鼠标进入模型
+        get
+        {
+            return HP <= 0;
+        }
     }
 
-    public virtual void OnMouseExit()
+    protected virtual void Update()
     {
-        // 鼠标离开模型
+
     }
 
-    public virtual void OnMouseClick()
+    protected virtual void OnMouseEnter()
     {
-        // 鼠标点击模型
+        Debug.Log("OnMouseEnter:" + name);
+    }
+
+    protected virtual void OnMouseExit()
+    {
+        Debug.Log("OnMouseExit:" + name);
     }
 }

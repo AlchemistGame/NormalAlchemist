@@ -97,22 +97,22 @@ namespace VoxelFramework
                                 Transparency transparency = voxelType.VTransparency;
                                 ColliderType colliderType = voxelType.VColliderType;
 
-                                if (CheckAdjacent(x, y, z, CubeDirection.forward, transparency) == true)
+                                if (CheckAdjacent(x, y, z, Direction.forward, transparency) == true)
                                     CreateFace(voxel, Facing.forward, colliderType, x, y, z);
 
-                                if (CheckAdjacent(x, y, z, CubeDirection.back, transparency) == true)
+                                if (CheckAdjacent(x, y, z, Direction.back, transparency) == true)
                                     CreateFace(voxel, Facing.back, colliderType, x, y, z);
 
-                                if (CheckAdjacent(x, y, z, CubeDirection.up, transparency) == true)
+                                if (CheckAdjacent(x, y, z, Direction.up, transparency) == true)
                                     CreateFace(voxel, Facing.up, colliderType, x, y, z);
 
-                                if (CheckAdjacent(x, y, z, CubeDirection.down, transparency) == true)
+                                if (CheckAdjacent(x, y, z, Direction.down, transparency) == true)
                                     CreateFace(voxel, Facing.down, colliderType, x, y, z);
 
-                                if (CheckAdjacent(x, y, z, CubeDirection.right, transparency) == true)
+                                if (CheckAdjacent(x, y, z, Direction.right, transparency) == true)
                                     CreateFace(voxel, Facing.right, colliderType, x, y, z);
 
-                                if (CheckAdjacent(x, y, z, CubeDirection.left, transparency) == true)
+                                if (CheckAdjacent(x, y, z, Direction.left, transparency) == true)
                                     CreateFace(voxel, Facing.left, colliderType, x, y, z);
                                 
                                 if (colliderType == ColliderType.none && Engine.GenerateColliders)
@@ -143,7 +143,7 @@ namespace VoxelFramework
             UpdateMesh(GetComponent<MeshFilter>().mesh);
         }
 
-        private bool CheckAdjacent(int x, int y, int z, CubeDirection direction, Transparency transparency)
+        private bool CheckAdjacent(int x, int y, int z, Direction direction, Transparency transparency)
         { // returns true if a face should be spawned
 
             VoxelPos index = chunk.GetAdjacentIndex(x, y, z, direction);
@@ -152,7 +152,7 @@ namespace VoxelFramework
             if (adjacentVoxel == ushort.MaxValue)
             { // if the neighbor chunk is missing
 
-                if (Engine.ShowBorderFaces || direction == CubeDirection.up)
+                if (Engine.ShowBorderFaces || direction == Direction.up)
                 {
                     return true;
                 }
@@ -187,7 +187,7 @@ namespace VoxelFramework
 
             for (int direction = 0; direction < 6; direction++)
             {
-                if (Engine.GetVoxelType(chunk.GetVoxel(chunk.GetAdjacentIndex(x, y, z, (CubeDirection)direction))).VTransparency != Transparency.solid)
+                if (Engine.GetVoxelType(chunk.GetVoxel(chunk.GetAdjacentIndex(x, y, z, (Direction)direction))).VTransparency != Transparency.solid)
                 {
                     return false;
                 }

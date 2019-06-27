@@ -1,10 +1,5 @@
 using UnityEngine;
 
-public enum CubeDirection
-{
-    up, down, right, left, forward, back
-}
-
 // 体素地图里的坐标用 int 来代替 float
 public class VoxelPos
 {
@@ -57,14 +52,14 @@ public class VoxelPos
         }
     }
 
-    public VoxelPos GetAdjacentIndex(CubeDirection direction)
+    public VoxelPos GetAdjacentIndex(Direction direction)
     {
-        if (direction == CubeDirection.down) return new VoxelPos(x, y - 1, z);
-        else if (direction == CubeDirection.up) return new VoxelPos(x, y + 1, z);
-        else if (direction == CubeDirection.left) return new VoxelPos(x - 1, y, z);
-        else if (direction == CubeDirection.right) return new VoxelPos(x + 1, y, z);
-        else if (direction == CubeDirection.back) return new VoxelPos(x, y, z - 1);
-        else if (direction == CubeDirection.forward) return new VoxelPos(x, y, z + 1);
+        if (direction == Direction.down) return new VoxelPos(x, y - 1, z);
+        else if (direction == Direction.up) return new VoxelPos(x, y + 1, z);
+        else if (direction == Direction.left) return new VoxelPos(x - 1, y, z);
+        else if (direction == Direction.right) return new VoxelPos(x + 1, y, z);
+        else if (direction == Direction.back) return new VoxelPos(x, y, z - 1);
+        else if (direction == Direction.forward) return new VoxelPos(x, y, z + 1);
         else return null;
     }
 
