@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using UnityEngine.UI;
 /// <summary>
 /// 纯表现层，用于注册对应的bind事件和实现具体的bind事件逻辑处理
 /// </summary>

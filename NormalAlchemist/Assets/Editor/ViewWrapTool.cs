@@ -126,7 +126,7 @@ public class ViewWrapTool : EditorWindow
         }
         //先创建一个空的预制物体
         //预制物体保存在工程中路径，可以修改("Assets/" + name + ".prefab");
-        GameObject tempPrefab = PrefabUtility.SaveAsPrefabAsset(go, prefabPath + name + ".prefab");
+        GameObject tempPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(go, prefabPath + name + ".prefab",InteractionMode.AutomatedAction);
         return tempPrefab;
     }
 
