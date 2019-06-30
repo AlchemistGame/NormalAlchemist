@@ -31,7 +31,6 @@ public class BuffView
     private byte _BuffCount;
     private BuffType _BuffType;
     private List<BuffLayer> ls_BuffLayers = new List<BuffLayer>();
-
     public delegate void BuffViewEvent(BuffView view);
     public BuffViewEvent OnDestroy;
     private bool _isPerpetual;

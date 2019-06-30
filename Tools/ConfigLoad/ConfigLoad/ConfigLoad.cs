@@ -79,7 +79,9 @@ namespace ConfigLoad
             }
             excel.LoadGeneralCodeDataFromFile(folderPath);
             codeGeneration.GeneralCodeEnumFromDict(excel.EnumDict);
+            codeGeneration.GeneralCodeStructFromDict(excel.StructDict);
             codeGeneration.GeneralCodeFromDict(excel.GeneralCodeData,excel.dict_ConfigIdNick);
+            codeGeneration.WriteResultToCs(folderPath + "\\StructDefine.cs", codeGeneration.StructGenerationResult);
             codeGeneration.WriteResultToCs(folderPath+"\\ConfigDefine.cs", codeGeneration.CodeGenerationResult);
             codeGeneration.WriteResultToCs(folderPath + "\\EnumDefine.cs", codeGeneration.EnumGenerationResult);
         }

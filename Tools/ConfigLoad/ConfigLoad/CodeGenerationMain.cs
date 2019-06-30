@@ -10,8 +10,10 @@ namespace ConfigLoad
     {
         public string CodeGenerationResult { get; private set; } = "";
         public string EnumGenerationResult { get; private set; } = "";
+        public string StructGenerationResult { get; private set; } = "";
         Dictionary<string, List<SelfPropertyInfo>> dict_GeneralCodeData;
         Dictionary<string, string> dict_EnumCodeData;
+        Dictionary<string, string> dict_StructCodeData;
         public void GenerationAll()
         {
             //CodeGenerationResult = "namespace DataConfig\r\n{\r\n";
@@ -19,10 +21,10 @@ namespace ConfigLoad
 
         private const string UsingHead = "";
 
-        private const string StartCode = "namespace DataConfig\r\n{\r\n";
+        private const string StartCode = "using DefineEnum;\nusing DefineStruct;\nnamespace DataConfig\r\n{\r\n";
         private const string EndCode = "}";
         private const string StartEnum = "namespace DefineEnum\r\n{\r\n";
-
+        private const string StartStruct = "namespace DefineStruct\r\n{\r\n";
 
         private string CreateTop(string fileName)
         {
@@ -40,19 +42,32 @@ namespace ConfigLoad
             return result;
         }
 
-        HashSet<string> typeValidate = new HashSet<string>() { "uint", "int", "bool", "byte", "string", "float", "double","enum" };
+        HashSet<string> typeValidate = new HashSet<string>() { "uint", "int", "bool", "byte", "string", "float", "double","enum","struct" };
+
+        HashSet<string> structValidate = new HashSet<string>() { };
+
         private string CreateProperty(string type, string name, string defaultData = "")
         {
-            type = type.ToLower();
+            //type = type.ToLower();
             string result = "";
             string enumTypeName = "";
+            string structTypeName = "";
             bool isEnumTypeAndHad = false;
-            if (!typeValidate.Contains(type) && !dict_EnumCodeData.ContainsKey(type))
+            if (!typeValidate.Contains(type) && !dict_EnumCodeData.ContainsKey(type)&& !dict_StructCodeData.ContainsKey(structTypeName))
             {
                 if (type.IndexOf("enum") != -1)
                 {
                     enumTypeName = type.Split('|')[1];
                     type = "enum";
+                }else if(type.IndexOf("struct") != -1)
+                {
+                    structTypeName = type.Split('|')[1];
+                    type = "struct";
+                    if (!dict_StructCodeData.ContainsKey(structTypeName))
+                    {
+                        Console.WriteLine("No this type struct:" + structTypeName);
+                        return null;
+                    }
                 }
                 else
                 {
@@ -77,6 +92,7 @@ namespace ConfigLoad
                     }
                 }
             }
+            
             bool isSuccess = true;
             if (defaultData != "")
             {
@@ -134,20 +150,7 @@ namespace ConfigLoad
 
             if (typeValidate.Contains(type) || isEnumTypeAndHad)
             {
-                if (isEnumTypeAndHad)
-                {
-                    if (defaultData != "")
-                    {
-                        result = "        public " + enumTypeName.ToUpper() + " " + name + " = " + defaultData + ";\r\n";
-                    }
-                    else
-                    {
-                        result = "        public " + enumTypeName.ToUpper() + " " + name + ";\r\n";
-
-                    }
-                    return result;
-                }
-                if (type != "enum")
+                if (type != "enum" && type!="struct")
                 {
                     if (defaultData != "")
                     {
@@ -160,21 +163,36 @@ namespace ConfigLoad
                 }
                 else
                 {
-                    if (enumTypeName != "")
+                    if (type == "enum")
                     {
-                        if (defaultData != "")
+                        if (enumTypeName != "")
                         {
-                            result = "        public " + enumTypeName.ToUpper() + " " + name + " = " + defaultData + ";\r\n";
+                            if (defaultData != "")
+                            {
+                                result = "        public " + enumTypeName.ToUpper() + " " + name + " = " + defaultData + ";\r\n";
+                            }
+                            else
+                            {
+                                result = "        public " + enumTypeName.ToUpper() + " " + name + ";\r\n";
+                            }
                         }
                         else
                         {
-                            result = "        public " + enumTypeName.ToUpper() + " " + name + ";\r\n";
+                            Console.WriteLine("EnumTypeName is Empty");
+                            return "";
                         }
                     }
-                    else
+                    if(type == "struct")
                     {
-                        Console.WriteLine("EnumTypeName is Empty");
-                        return "";
+                        if (structTypeName != "")
+                        {
+                            result = "        public " + structTypeName + "? " + name + ";\r\n";
+                        }
+                        else
+                        {
+                            Console.WriteLine("structTypeName is Empty");
+                            return "";
+                        }
                     }
                 }
                 return result;
@@ -186,6 +204,42 @@ namespace ConfigLoad
                 return "";
             }
         }
+
+        //key: Vector3  value :  float = X| float=Y| float=Z
+        public void GeneralCodeStructFromDict(Dictionary<string, string> GeneralStructData)
+        {
+            dict_StructCodeData = GeneralStructData;
+            StructGenerationResult += StartStruct;
+            foreach (var kv in GeneralStructData)
+            {
+                StructGenerationResult += CreateStructKeyValue(kv.Key, kv.Value);
+            }
+            StructGenerationResult += EndCode;
+        }
+        private string CreateStructKeyValue(string structName, string structValue)
+        {
+            string structResult = "";
+            string top = "    public struct " + structName + "\r\n" + "    {\r\n";
+            string bottom = "    }\r\n";
+            if (structValue.IndexOf("|") == -1)
+            {
+                return "";
+            }
+            string temp = structValue.Replace(" ", "");
+            string[] keyValue = temp.Split('|');
+            foreach (var i in keyValue)
+            {
+                string[] kv = i.Split('=');
+                string result = CreateProperty(kv[0].ToLower(), kv[1]);
+                if (result != null)
+                {
+                    structResult += result;
+                }
+            }
+
+            return top + structResult + bottom;
+        }
+
 
         //key: Color  value :  Red = 1| Black=2| Green=3
         public void GeneralCodeEnumFromDict(Dictionary<string, string> GeneralEnumData)
@@ -201,8 +255,8 @@ namespace ConfigLoad
         private string CreateEnumKeyValue(string enumName, string enumValue)
         {
             string enumResult = "";
-            string top = "public enum " + enumName.ToUpper() + "\r\n" + " {\r\n";
-            string bottom = "}\r\n";
+            string top = "    public enum " + enumName.ToUpper() + "\r\n" + "    {\r\n";
+            string bottom = "    }\r\n";
             if (enumValue.IndexOf("|") == -1)
             {
                 return "";
@@ -216,7 +270,7 @@ namespace ConfigLoad
                 bool result = uint.TryParse(kv[1], out outUInt);
                 if (result)
                 {
-                    enumResult += kv[0].ToUpper() + " = " + kv[1] + ",\r\n";
+                    enumResult += "        "+kv[0].ToUpper() + " = " + kv[1] + ",\r\n";
                 }
             }
 
@@ -260,8 +314,8 @@ namespace ConfigLoad
         private string SerchIdNickName(string fileName, List<string> id_NickName)
         {
             string nickNameEnum = "";
-            string top = "public enum " + fileName + "Id\r\n" + " {\r\n";
-            string bottom = "}\r\n";
+            string top = "    public enum " + fileName + "Id\r\n" + "    {\r\n";
+            string bottom = "    }\r\n";
             foreach (var i in id_NickName)
             {
                 if (i.IndexOf("|") == -1)
@@ -276,7 +330,7 @@ namespace ConfigLoad
                 bool result = uint.TryParse(id_nick[0], out outUInt);
                 if (result)
                 {
-                    nickNameEnum += id_nick[1] + " = " +  id_nick[0] + ",\r\n";
+                    nickNameEnum += "        "+id_nick[1] + " = " +  id_nick[0] + ",\r\n";
                 }
             }
 
@@ -289,6 +343,7 @@ namespace ConfigLoad
                 File.Delete(filePath);
 
             FileStream fs = new FileStream(filePath, FileMode.Create);
+            fs.Seek(0, SeekOrigin.Begin);
             byte[] data = System.Text.Encoding.Default.GetBytes(outPutString);
             fs.Write(data, 0, data.Length);
             fs.Flush();

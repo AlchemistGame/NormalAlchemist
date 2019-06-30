@@ -1,9 +1,11 @@
+using DefineEnum;
+using DefineStruct;
 namespace DataConfig
 {
-public enum templeteXLSXId
- {
-burning = 1,
-}
+    public enum templeteXLSXId
+    {
+        burning = 1,
+    }
     public class templeteXLSX
     {
         public int id;
@@ -14,5 +16,6 @@ burning = 1,
         public byte Duration;
         public float Bonus = 1;
         public ABILLITY MainAttribute = ABILLITY.NULL;
+        public ManaUseLevel? ManaUsage;
     }
 }

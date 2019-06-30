@@ -12,7 +12,6 @@ public struct SelfPropertyInfo
     public string fieldType;
     public string propertyName;
     public string generalTarget;
-    public List<string> id_nick;
 }
 namespace ConfigLoad
 {
@@ -28,6 +27,7 @@ namespace ConfigLoad
         public Dictionary<string, List<string>> dict_ConfigIdNick = new Dictionary<string, List<string>>();
 
         public Dictionary<string, string> EnumDict = new Dictionary<string, string>();
+        public Dictionary<string, string> StructDict = new Dictionary<string, string>();
         public void LoadGeneralCodeDataFromFile(string path)
         {
             GeneralCodeData.Clear();
@@ -49,7 +49,7 @@ namespace ConfigLoad
                     for (int j = 0; j < excData.Tables[tabs].Columns.Count; ++j)
                     {
                         var key = excData.Tables[tabs].Rows[j][keyRow];
-                        if (!(key is string))
+                        if  (key.ToString() == "id")
                         {
                             idStartColumns = j;
                             break;
@@ -59,7 +59,7 @@ namespace ConfigLoad
                 List<string> ls_idNickName = new List<string>();
                 for(int tabs = 0; tabs < excData.Tables.Count; ++tabs)
                 {
-                    for (int j = idStartColumns+1; j < excData.Tables[tabs].Columns.Count; ++j)
+                    for (int j = idStartColumns+1; j < excData.Tables[tabs].Rows.Count; ++j)
                     {
                         var key = excData.Tables[tabs].Rows[j][keyRow];
 
@@ -77,7 +77,7 @@ namespace ConfigLoad
                 List<SelfPropertyInfo> ls_OneClassPropertyInfo = new List<SelfPropertyInfo>();
                 for (int tabs = 0; tabs < excData.Tables.Count; ++tabs)
                 {
-                    for (int i = 1; i < excData.Tables[tabs].Rows.Count; ++i)
+                    for (int i = 1; i < excData.Tables[tabs].Columns.Count; ++i)
                     {
                         if (!(excData.Tables[tabs].Rows[0][i] is string))
                             continue;
@@ -91,23 +91,43 @@ namespace ConfigLoad
                             {
                                 string k = key.ToString();
                                 string value = excData.Tables[tabs].Rows[j][i].ToString();
-                                if (k == "fieldType" && value.ToLower().IndexOf("enum")!=-1)
+                                if (k == "fieldType")
                                 {
-                                    string temp = value.ToLower();
-                                    //enum Color:{ Red = 1| Black=2| Green=3 }
-                                    temp = temp.Replace("enum", "").Replace(" ", "").Replace("{", "").Replace("}","");
-                                    string[] enumValue = temp.Split(':');
-                                    if (!EnumDict.ContainsKey(enumValue[0]))
+                                    if (value.ToLower().IndexOf("enum") != -1)
                                     {
-                                        EnumDict.Add(enumValue[0], enumValue[1]);
+                                        string temp = value.ToLower();
+                                        //enum Color:{ Red = 1| Black=2| Green=3 }
+                                        temp = temp.Replace("enum", "").Replace(" ", "").Replace("{", "").Replace("}", "");
+                                        string[] enumValue = temp.Split(':');
+                                        if (!EnumDict.ContainsKey(enumValue[0]))
+                                        {
+                                            EnumDict.Add(enumValue[0], enumValue[1]);
+                                        }
+                                        else
+                                        {
+                                            Console.Write("enum Name:" + enumValue[0] + " is Already Exist!!");
+                                        }
+                                        value = "enum|" + enumValue[0];
                                     }
-                                    else
+                                    if(value.ToLower().IndexOf("struct") != -1)
                                     {
-                                        Console.Write("enum Name:"+enumValue[0]+" is Already Exist!!");
+                                        string temp = value;
+                                        //enum Color:{ Red = 1| Black=2| Green=3 }
+                                        temp = temp.Replace("struct", "").Replace(" ", "").Replace("{", "").Replace("}", "");
+                                        string[] structValue = temp.Split(':');
+                                        if (!StructDict.ContainsKey(structValue[0]))
+                                        {
+                                            StructDict.Add(structValue[0], structValue[1]);
+                                        }
+                                        else
+                                        {
+                                            Console.Write("struct Name:" + structValue[0] + " is Already Exist!!");
+                                        }
+                                        value = "struct|" + structValue[0];
                                     }
-                                    value = "enum|" + enumValue[0];
+
                                 }
-                                
+
                                 FieldInfo fi = t.GetField(k);
                                 if(fi!= null)
                                 {
