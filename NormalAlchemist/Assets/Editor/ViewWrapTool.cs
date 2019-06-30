@@ -46,8 +46,8 @@ public class ViewWrapTool : EditorWindow
                 bool isWraped = con.Contains("#region WrapStart");
                 string pattern = @"(#region WrapStart)[\d\D]*?(#endregion WrapEnd)";
                 UIBindCellBase[] lsBindCell = go.GetComponentsInChildren<UIBindCellBase>();
-                string modpath =  path.Replace("/" + view.GetType().Name + ".cs", "/" + view.GetType().Name + "Model.cs");
-                
+                string modpath = path.Replace("/" + view.GetType().Name + ".cs", "/" + view.GetType().Name + "Model.cs");
+
                 if (lsBindCell.Length > 0)
                 {
                     string wrapStr = MakeWrapFieldDefault(lsBindCell);
@@ -100,7 +100,7 @@ public class ViewWrapTool : EditorWindow
         if (GUI.Button(new Rect(0, position.height - 20, 120, 20), "生成脚本并创建Prefab"))
         {
             string controlPath, viewPath;
-            CreateClass(prefabName, prefabControlName, prefabViewName , prefabViewName + "Model", out controlPath, out viewPath);
+            CreateClass(prefabName, prefabControlName, prefabViewName, prefabViewName + "Model", out controlPath, out viewPath);
 
             GameObject go = CreatePrefab(Selection.activeGameObject, prefabName);
             //CreatePrefab(go, prefabName);
@@ -136,11 +136,11 @@ public class ViewWrapTool : EditorWindow
         }
         //先创建一个空的预制物体
         //预制物体保存在工程中路径，可以修改("Assets/" + name + ".prefab");
-        GameObject tempPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(go, prefabPath + name + ".prefab",InteractionMode.AutomatedAction);
+        GameObject tempPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(go, prefabPath + name + ".prefab", InteractionMode.AutomatedAction);
         return tempPrefab;
     }
 
-    public static void CreateClass(string fileName, string ControlName, string ViewName,string ModelName, out string controlPath, out string viewPath)
+    public static void CreateClass(string fileName, string ControlName, string ViewName, string ModelName, out string controlPath, out string viewPath)
     {
 
         string curDir = Application.dataPath + "/_Scripts/Common/UI/UIWrap/" + fileName;
@@ -228,41 +228,62 @@ public class ViewWrapTool : EditorWindow
         return rt;
     }
 
-    public static void MakeWrapModel(UIBindCellBase[] lsBindCell,string viewName,string path)
+    public static void MakeWrapModel(UIBindCellBase[] lsBindCell, string viewName, string path)
     {
         StreamWriter fileWriter = new StreamWriter(path, false);
-        fileWriter.Write("public class " + viewName+ "Model");
+        fileWriter.Write("public class " + viewName + "Model");
         fileWriter.Write(" : BaseModel");
         fileWriter.Write("\n{\n");
 
         string kvs = "";
+        Dictionary<string, List<UIBindCellBase>> dict = new Dictionary<string, List<UIBindCellBase>>();
         foreach (var i in lsBindCell)
         {
-            bool isHandle = i.GetHandleFunc()!=null;
-            bool isFunc = i.GetFuncName() != null;
-            if (isFunc || isHandle)
+            if (dict.ContainsKey(i.bindCellName))
             {
-                string kv = "\n    private dynamic _" + i.bindCellName.ToLower() + ";";
-                kv += "\n    public dynamic " + i.bindCellName + "\n    {";
-                kv += "\n        get";
-                kv += "\n        {";
-                kv += "\n            return _" + i.bindCellName.ToLower()+";";
-                kv += "\n        }";
-                kv += "\n        set";
-                kv += "\n        {";
-                kv += "\n            _" + i.bindCellName.ToLower() + " = value;";
-                if (isHandle)
-                {
-                    kv += "\n            TryCallHandle(\"" + i.bindCellName + "\", \"" + i.GetHandleFunc() + "\", value);";
-                }
-                if (isFunc)
-                {
-                    kv += "\n            TryCall(\"" + i.bindCellName + "\", \"" + i.GetHandleFunc() + "\", value);";
-                }
-                kv += "\n        }";
-                kv += "\n    }";
-                kvs = kvs + kv;
+                dict[i.bindCellName].Add(i);
             }
+            else
+            {
+                List<UIBindCellBase> v = new List<UIBindCellBase>();
+                v.Add(i);
+                dict.Add(i.bindCellName, v);
+            }
+        }
+
+
+        foreach (var i in dict)
+        {
+            string kv = "\n    private dynamic _" + i.Key.ToLower() + ";";
+            kv += "\n    public dynamic " + i.Key + "\n    {";
+            kv += "\n        get";
+            kv += "\n        {";
+            kv += "\n            return _" + i.Key.ToLower() + ";";
+            kv += "\n        }";
+            kv += "\n        set";
+            kv += "\n        {";
+            kv += "\n            _" + i.Key.ToLower() + " = value;";
+            foreach (var k in i.Value)
+            {
+                bool isHandle = k.GetHandleFunc() != null;
+                bool isFunc = k.GetFuncName() != null;
+                if (isFunc || isHandle)
+                {
+
+                    if (isHandle)
+                    {
+                        kv += "\n            TryCallHandle(\"" + i.Key + "\", \"" + k.GetHandleFunc() + "\", value);";
+                    }
+                    if (isFunc)
+                    {
+                        kv += "\n            TryCall(\"" + i.Key + "\", \"" + k.GetHandleFunc() + "\", value);";
+                    }
+
+                }
+            }
+            kv += "\n        }";
+            kv += "\n    }";
+            kvs = kvs + kv;
         }
         fileWriter.Write(kvs);
         fileWriter.Write("\n}");

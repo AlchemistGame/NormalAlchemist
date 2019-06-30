@@ -9,9 +9,9 @@ public class UIBindHandle
 
     }
 
-    public static void CallBindStringToText(UIBindCellBase cell,string value)
+    public static void CallBindStringToText(UIBindCellBase cell,object value)
     {
-        ((UIBindStringToLabel)cell).LabelText = value;
+        ((UIBindStringToLabel)cell).LabelText = value.ToString();
     }
 
 }
