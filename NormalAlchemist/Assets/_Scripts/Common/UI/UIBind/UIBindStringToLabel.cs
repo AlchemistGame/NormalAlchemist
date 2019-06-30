@@ -21,4 +21,9 @@ public class UIBindStringToLabel : UIBindCellBase
     {
         return "这是默认内容";
     }
+
+    public override string GetHandleFunc()
+    {
+        return "CallBindStringToText";
+    }
 }

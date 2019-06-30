@@ -46,7 +46,8 @@ public class ViewWrapTool : EditorWindow
                 bool isWraped = con.Contains("#region WrapStart");
                 string pattern = @"(#region WrapStart)[\d\D]*?(#endregion WrapEnd)";
                 UIBindCellBase[] lsBindCell = go.GetComponentsInChildren<UIBindCellBase>();
-                Debug.LogError(view.GetType().Name);
+                string modpath =  path.Replace("/" + view.GetType().Name + ".cs", "/" + view.GetType().Name + "Model.cs");
+                
                 if (lsBindCell.Length > 0)
                 {
                     string wrapStr = MakeWrapFieldDefault(lsBindCell);
@@ -70,6 +71,9 @@ public class ViewWrapTool : EditorWindow
                     fileWriter.Flush();
                     fileWriter.Close();
                     fileWriter.Dispose();
+
+                    MakeWrapModel(lsBindCell, view.GetType().Name, modpath);
+
                     AssetDatabase.Refresh();
                 }
             }
@@ -91,12 +95,12 @@ public class ViewWrapTool : EditorWindow
 
         prefabViewName = EditorGUILayout.TextField("Prefab View Name", prefabViewName);
         prefabControlName = EditorGUILayout.TextField("Prefab Control Name", prefabControlName);
-        prefabModelName = EditorGUILayout.TextField("Prefab Model Name", prefabModelName);
+        //prefabModelName = EditorGUILayout.TextField("Prefab Model Name", prefabModelName);
 
         if (GUI.Button(new Rect(0, position.height - 20, 120, 20), "生成脚本并创建Prefab"))
         {
             string controlPath, viewPath;
-            CreateClass(prefabName, prefabControlName, prefabViewName , prefabModelName ,out controlPath, out viewPath);
+            CreateClass(prefabName, prefabControlName, prefabViewName , prefabViewName + "Model", out controlPath, out viewPath);
 
             GameObject go = CreatePrefab(Selection.activeGameObject, prefabName);
             //CreatePrefab(go, prefabName);
@@ -105,8 +109,14 @@ public class ViewWrapTool : EditorWindow
         if (GUI.Button(new Rect(120, position.height - 20, 100, 20), "添加脚本"))
         {
             GameObject go = CreatePrefab(Selection.activeGameObject, prefabName);
-            go.AddComponent(Type.GetType(prefabControlName + ", Assembly-CSharp"));
-            go.AddComponent(Type.GetType(prefabViewName + ", Assembly-CSharp"));
+            if (!go.GetComponent(Type.GetType(prefabControlName + ", Assembly-CSharp")))
+            {
+                go.AddComponent(Type.GetType(prefabControlName + ", Assembly-CSharp"));
+            }
+            if (!go.GetComponent(Type.GetType(prefabViewName + ", Assembly-CSharp")))
+            {
+                go.AddComponent(Type.GetType(prefabViewName + ", Assembly-CSharp"));
+            }
             PrefabUtility.RevertObjectOverride(Selection.activeGameObject, InteractionMode.AutomatedAction);
         }
         GUILayout.EndVertical();
@@ -232,24 +242,25 @@ public class ViewWrapTool : EditorWindow
             bool isFunc = i.GetFuncName() != null;
             if (isFunc || isHandle)
             {
-                string kv = "\nprivate dynamic _"+i.bindCellName.ToLower();
-                kv += "\npublic dynamic " + i.bindCellName;
-                kv += "\nget";
-                kv += "\n{";
-                kv += "\nreturn _"+ i.bindCellName.ToLower()+";";
-                kv += "\n}";
-                kv += "\nset";
-                kv += "\n{";
-                kv += "\n  _" + i.bindCellName.ToLower() + " = value;";
+                string kv = "\n    private dynamic _" + i.bindCellName.ToLower() + ";";
+                kv += "\n    public dynamic " + i.bindCellName + "\n    {";
+                kv += "\n        get";
+                kv += "\n        {";
+                kv += "\n            return _" + i.bindCellName.ToLower()+";";
+                kv += "\n        }";
+                kv += "\n        set";
+                kv += "\n        {";
+                kv += "\n            _" + i.bindCellName.ToLower() + " = value;";
                 if (isHandle)
                 {
-                    kv += "\nTryCallHandle(\"" + i.bindCellName + "\", \"" + i.GetHandleFunc() + "\", value);";
+                    kv += "\n            TryCallHandle(\"" + i.bindCellName + "\", \"" + i.GetHandleFunc() + "\", value);";
                 }
                 if (isFunc)
                 {
-                    kv += "\nTryCall(\"" + i.bindCellName + "\", \"" + i.GetHandleFunc() + "\", value);";
+                    kv += "\n            TryCall(\"" + i.bindCellName + "\", \"" + i.GetHandleFunc() + "\", value);";
                 }
-
+                kv += "\n        }";
+                kv += "\n    }";
                 kvs = kvs + kv;
             }
         }
