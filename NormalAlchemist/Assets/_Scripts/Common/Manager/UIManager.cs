@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
+
 public class UIManager : BaseManager
 {
     private UIManager() { }
@@ -41,7 +42,7 @@ public class UIManager : BaseManager
     {
         get
         {
-            if (canvas== null)
+            if (canvas == null)
             {
                 canvas = GameMain.Instance.UIRender.GetComponent<UIRender>().UIMainCanvas.gameObject.GetComponent<RectTransform>();
             }

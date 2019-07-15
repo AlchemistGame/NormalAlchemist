@@ -58,7 +58,7 @@ public class MapMenu : MonoBehaviour
         btnOpenMap.onClick.AddListener(() =>
         {
             // 地图名
-            string mapPath = FileBrowser.OpenSingleFile("打开地图", GlobalMapEditor.MapLevelsDir, "map");
+            string mapPath = FileBrowser.OpenSingleFile("打开地图", GlobalSettings.MapLevelsDir, "map");
             string mapName = Path.GetFileNameWithoutExtension(mapPath);
             if (mapName.Length > 0)
             {
@@ -107,11 +107,11 @@ public class MapMenu : MonoBehaviour
             string mapPath;
             string mapPathMetaPath = "";
 
-            string mapPath_2 = GlobalMapEditor.MapLevelsDir + new_name + ".map";
-            string mapPathMetaPath_2 = GlobalMapEditor.MapLevelsDir + new_name + ".map.meta";
+            string mapPath_2 = GlobalSettings.MapLevelsDir + new_name + ".map";
+            string mapPathMetaPath_2 = GlobalSettings.MapLevelsDir + new_name + ".map.meta";
 
-            mapPath = GlobalMapEditor.MapLevelsDir + old_name + ".map";
-            mapPathMetaPath = GlobalMapEditor.MapLevelsDir + old_name + ".map.meta";
+            mapPath = GlobalSettings.MapLevelsDir + old_name + ".map";
+            mapPathMetaPath = GlobalSettings.MapLevelsDir + old_name + ".map.meta";
 
             if (File.Exists(mapPath))
             {
@@ -135,7 +135,7 @@ public class MapMenu : MonoBehaviour
         {
             string mapPath;
 
-            mapPath = GlobalMapEditor.MapLevelsDir + old_name + ".map";
+            mapPath = GlobalSettings.MapLevelsDir + old_name + ".map";
 
             string new_map_info = "";
 
@@ -151,7 +151,7 @@ public class MapMenu : MonoBehaviour
 
             if (mapPath_exists)
             {
-                StreamWriter sw2 = new StreamWriter(GlobalMapEditor.MapLevelsDir + new_name + ".map");
+                StreamWriter sw2 = new StreamWriter(GlobalSettings.MapLevelsDir + new_name + ".map");
                 sw2.Write(new_map_info);
                 sw2.Flush();
                 sw2.Close();
@@ -217,7 +217,7 @@ public class MapMenu : MonoBehaviour
 
     private List<string> ReadAllMaps()
     {
-        DirectoryInfo dirInfo = new DirectoryInfo(GlobalMapEditor.MapLevelsDir);
+        DirectoryInfo dirInfo = new DirectoryInfo(GlobalSettings.MapLevelsDir);
         FileInfo[] filesInfo = dirInfo.GetFiles("*.map");
         List<string> myMaps = new List<string>();
         for (int i = 0; i < filesInfo.Length; i++)
@@ -230,7 +230,7 @@ public class MapMenu : MonoBehaviour
 
     private void DeleteMap(string name)
     {
-        string mapPath = GlobalMapEditor.MapLevelsDir + name + ".map";
+        string mapPath = GlobalSettings.MapLevelsDir + name + ".map";
         if (File.Exists(mapPath))
         {
             File.Delete(mapPath);

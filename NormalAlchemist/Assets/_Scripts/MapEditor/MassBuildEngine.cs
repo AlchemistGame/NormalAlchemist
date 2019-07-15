@@ -4,33 +4,16 @@ using UnityEngine;
 
 public class MassBuildEngine : MonoBehaviour
 {
-    public class Tile
-    {
-        public Vector3 pos;
-        public Vector3 scale;
-        public Collider coll;
-
-        public Tile(Vector3 _pos, Vector3 _scale, Collider _coll)
-        {
-            pos = _pos;
-            scale = _scale;
-            coll = _coll;
-        }
-    }
-
-    private List<Tile> newTiles = new List<Tile>();
+    private List<VoxelInfo> newTiles = new List<VoxelInfo>();
     private List<GameObject> dummyTrash = new List<GameObject>();
     private GameObject mDummy;
     private GameObject mTile;
-    private string mName;
     private string mGuid;
-    private MapEditorEngine uteMEE;
     private UndoSystem UndoSystem;
     private Vector2 lastDistance;
     private string xzCountLabel;
     private bool isBuilding;
     private int heightStep;
-    private float startMousePosY;
 
     // reminders
     private int lastDistanceX;
@@ -53,18 +36,16 @@ public class MassBuildEngine : MonoBehaviour
         lastDistance = new Vector3(-10000, -10000, -10000);
         mDummy = (GameObject)Resources.Load("uteForEditor/uteTcDummy");
         mDummyMat = (Material)Resources.Load("uteForEditor/uteTcDummyMat");
-        uteMEE = this.gameObject.GetComponent<MapEditorEngine>();
         UndoSystem = this.gameObject.GetComponent<UndoSystem>();
     }
 
-    public void massBuildStart(GameObject _mTile, string _mName, string _mGuid)
+    public void massBuildStart(GameObject _mTile, string _mGuid)
     {
         mDummy = Instantiate(_mTile);
         isAboutToCancel = false;
         isBuilding = true;
         isItFirst = true;
         mTile = _mTile;
-        mName = _mName;
         mGuid = _mGuid;
         lastXfill = 0;
         lastZfill = 0;
@@ -93,7 +74,7 @@ public class MassBuildEngine : MonoBehaviour
             isItFirst = false;
 
             startPosition = obj.transform.position;
-            newTiles.Add(new Tile(startPosition, obj.transform.localScale, obj.GetComponent<Collider>()));
+            newTiles.Add(new VoxelInfo(new VoxelPos(startPosition)));
 
             if (mDummy)
             {
@@ -125,9 +106,6 @@ public class MassBuildEngine : MonoBehaviour
 
                 StartCoroutine(AddTile(null, true));
             }
-        }
-        else if (!isAboutToCancel)
-        {
         }
 
         if ((isGoodToGo || refresh) && !isAboutToCancel)
@@ -244,7 +222,7 @@ public class MassBuildEngine : MonoBehaviour
                                 position = new Vector3(startPosition.x + (obj.GetComponent<Collider>().bounds.size.x * i), obj.transform.position.y, startPosition.z - (obj.GetComponent<Collider>().bounds.size.z * j));
                             }
 
-                            newTiles.Add(new Tile(position + new Vector3(0, addPosY, 0), obj.transform.localScale, obj.GetComponent<Collider>()));
+                            newTiles.Add(new VoxelInfo(new VoxelPos(position + new Vector3(0, addPosY, 0))));
 
                             if (mDummy)
                             {
@@ -324,43 +302,25 @@ public class MassBuildEngine : MonoBehaviour
         }
     }
 
-    public void Cancel()
-    {
-        isBuilding = false;
-        isAboutToCancel = true;
-        FinishUp(true);
-    }
-
     private void Update()
     {
-        if (uteMEE)
+        if (Input.GetKeyDown(KeyCode.Alpha1))
         {
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                StepDown();
-            }
+            StepDown();
+        }
 
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                StepUp();
-            }
+        if (Input.GetKeyDown(KeyCode.Alpha2))
+        {
+            StepUp();
+        }
 
-            if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                StepOne();
-            }
+        if (Input.GetKeyDown(KeyCode.Alpha3))
+        {
+            StepOne();
         }
 
         if (isBuilding)
         {
-            if (uteMEE)
-            {
-                if (Input.GetKeyDown(KeyCode.Alpha4))
-                {
-                    Cancel();
-                }
-            }
-
             if (Input.GetMouseButtonUp(0))
             {
                 if (isBuilding && !isAboutToCancel)
@@ -371,7 +331,7 @@ public class MassBuildEngine : MonoBehaviour
         }
     }
 
-    public void FinishUp(bool isCancel = false)
+    public void FinishUp()
     {
         isItFirst = true;
 
@@ -382,27 +342,27 @@ public class MassBuildEngine : MonoBehaviour
 
         if (newTiles.Count > 0)
         {
-            if (!isCancel)
+            GlobalSettings.UndoSession = 1;
+
+            for (int i = 0; i < newTiles.Count; i++)
             {
-                GlobalMapEditor.UndoSession = 1;
+                VoxelInfo tile = newTiles[i];
 
-                for (int i = 0; i < newTiles.Count; i++)
+                if (newTiles.Count == 1)
                 {
-                    Tile tile = newTiles[i];
-                    if (uteMEE)
-                    {
-                        if (newTiles.Count == 1)
-                        {
-                            GlobalMapEditor.UndoSession = 2;
-                        }
+                    GlobalSettings.UndoSession = 2;
+                }
 
-                        uteMEE.ApplyBuild(mTile, tile.pos, mName, mGuid, mTile.transform.localEulerAngles);
+                if (mTile != null)
+                {
+                    MapManager.Instance.PlaceBlock(tile, mTile.GetComponent<TagMapObject>());
 
-                        if (i == newTiles.Count - 2)
-                        {
-                            GlobalMapEditor.UndoSession = 2;
-                        }
-                    }
+                    GlobalSettings.mapObjectCount++;
+                }
+
+                if (i == newTiles.Count - 2)
+                {
+                    GlobalSettings.UndoSession = 2;
                 }
             }
 

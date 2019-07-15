@@ -1,56 +1,48 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class ActorIdleState : State
+namespace MyBattle
 {
-    public override void Enter()
+    public class ActorIdleState : State
     {
-        base.Enter();
-
-        ActorManager.Instance.OnUpdate += OnIdleInput;
-
-        ActorManager.Instance.selectedBlockGO.GetComponent<Renderer>().enabled = true;
-    }
-
-    public override void Exit()
-    {
-        base.Exit();
-
-        ActorManager.Instance.OnUpdate -= OnIdleInput;
-    }
-
-    private void OnIdleInput()
-    {
-        if (EventSystem.current.IsPointerOverGameObject())
+        public override void Enter()
         {
-            // 鼠标正在操作 UI
-            return;
+            base.Enter();
+
+            BattleManager.Instance.OnUpdate += OnIdleInput;
         }
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
+        public override void Exit()
         {
-            if (hit.collider.tag.Equals("Ground"))
+            base.Exit();
+
+            BattleManager.Instance.OnUpdate -= OnIdleInput;
+        }
+
+        private void OnIdleInput()
+        {
+            if (EventSystem.current.IsPointerOverGameObject())
             {
-                Vector3 hitPosition = hit.point;
+                // 鼠标正在操作 UI
+                return;
+            }
 
-                if (Input.GetMouseButtonDown(0))
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit))
+            {
+                if (hit.collider.tag.Equals(TagDefine.land))
                 {
-                    ActorManager.Instance.targetPosition = hitPosition;
+                    Vector3 hitPosition = hit.point;
 
-                    ActorManager.Instance.ChangeState<ActorMoveState>();
-                }
-                else
-                {
-                    OnGridSelect(hitPosition);
+                    if (Input.GetMouseButtonDown(0))
+                    {
+                        BattleManager.Instance.targetPosition = hitPosition;
+
+                        BattleManager.Instance.ChangeState<ActorMoveState>();
+                    }
                 }
             }
         }
-    }
-
-    private void OnGridSelect(Vector3 groundPos)
-    {
-        ActorManager.Instance.selectedBlockGO.transform.position = Pathfinding.GridManager.Instance.GetGridCenterPos(groundPos);
     }
 }

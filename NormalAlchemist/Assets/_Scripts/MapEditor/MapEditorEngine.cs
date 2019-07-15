@@ -35,7 +35,6 @@ public class MapEditorEngine : MonoBehaviour
     private bool is2D;
     private bool isOrtho;
     private bool canBuild;
-    private bool isCurrentStatic;
     private bool isCamGridMoving;
     private bool isMouseDown;
     private bool isInTopView;
@@ -72,8 +71,6 @@ public class MapEditorEngine : MonoBehaviour
 
     // map objects
     private GameObject MAP;
-    private GameObject MAP_STATIC;
-    private GameObject MAP_DYNAMIC;
     private GameObject MAIN;
     private GameObject cameraGO;
     private List<CatInfo> allTiles = new List<CatInfo>();
@@ -86,7 +83,6 @@ public class MapEditorEngine : MonoBehaviour
     [HideInInspector]
     public GameObject grid;
     private GameObject hitObject;
-    private bool isAltPressed;
     private float cameraSensitivity;
 
     // UI objects
@@ -96,7 +92,6 @@ public class MapEditorEngine : MonoBehaviour
     private List<string> undo_guids = new List<string>();
 
     // helpers
-    private bool eraserIsEnabled;
     private GameObject helpers_CANTBUILD;
     private GameObject helpers_CANBUILD;
 
@@ -166,8 +161,6 @@ public class MapEditorEngine : MonoBehaviour
         currentMode = MapEditorMode.Place;
         passSaveA = false;
         passSaveB = false;
-        eraserIsEnabled = false;
-        isAltPressed = false;
         isInTopView = false;
         lastTile = null;
         currentLayer = 0;
@@ -180,11 +173,6 @@ public class MapEditorEngine : MonoBehaviour
         currentObjectGUID = "";
 
         MAP = new GameObject("MAP");
-        MAP_DYNAMIC = new GameObject("MAP_DYNAMIC");
-        MAP_DYNAMIC.transform.parent = MAP.transform;
-        MAP_STATIC = new GameObject("MAP_STATIC");
-        MAP_STATIC.transform.parent = MAP.transform;
-        MAP_STATIC.isStatic = true;
         mapLightGO = Instantiate(Resources.Load<GameObject>("uteForEditor/uteMapLight"));
         mapLightGO.name = "MapLight";
         mapLightGO.SetActive(true);
@@ -203,11 +191,9 @@ public class MapEditorEngine : MonoBehaviour
 
         UndoSystem = this.gameObject.AddComponent<UndoSystem>();
 
-        StartCoroutine(EraserHandler());
-
         if (isItLoad)
         {
-            yield return StartCoroutine(LoadMap(newProjectName, MAP_STATIC, MAP_DYNAMIC));
+            yield return StartCoroutine(LoadMap(newProjectName, MAP));
             yield return StartCoroutine(LoadCameraInfo());
             notReady = false;
         }
@@ -224,10 +210,10 @@ public class MapEditorEngine : MonoBehaviour
         yield return 0;
     }
 
-    public IEnumerator LoadMap(string name, GameObject map_static, GameObject map_dynamic)
+    public IEnumerator LoadMap(string name, GameObject mapObject)
     {
         isMapLoaded = false;
-        string path = GlobalMapEditor.MapLevelsDir + name + ".map";
+        string path = GlobalSettings.MapLevelsDir + name + ".map";
         StreamReader sr = new StreamReader(path);
         string info = sr.ReadToEnd();
         sr.Close();
@@ -249,40 +235,23 @@ public class MapEditorEngine : MonoBehaviour
                 int rX = System.Convert.ToInt32(allinfo[4].ToString());
                 int rY = System.Convert.ToInt32(allinfo[5].ToString());
                 int rZ = System.Convert.ToInt32(allinfo[6].ToString());
-                string staticInfo = allinfo[7].ToString();
                 string familyName = allinfo[9].ToString();
 
                 GameObject tGO = Resources.Load<GameObject>(GetTileAssetPathByID(id));
                 if (tGO)
                 {
                     GameObject newGO = Instantiate(tGO, Vector3.zero, new Quaternion(0, 0, 0, 0));
-                    List<GameObject> twoGO = new List<GameObject>();
-                    twoGO = CreateColliderToObject(newGO);
-                    GameObject behindGO = twoGO[0];
-                    newGO = twoGO[1];
-                    behindGO.name = tGO.name;
                     newGO.name = tGO.name;
+                    GameObject behindGO = CreateColliderToObject(newGO);
                     behindGO.layer = 0;
                     behindGO.transform.position = new Vector3(pX, pY, pZ);
                     behindGO.transform.localEulerAngles = new Vector3(rX, rY, rZ);
                     behindGO.GetComponent<Collider>().isTrigger = false;
                     TagMapObject uTO = behindGO.AddComponent<TagMapObject>();
                     uTO.objGUID = id;
+                    behindGO.transform.parent = mapObject.transform;
 
-                    if (staticInfo.Equals("1"))
-                    {
-                        newGO.isStatic = true;
-                        uTO.isStatic = true;
-                        behindGO.transform.parent = map_static.transform;
-                    }
-                    else if (staticInfo.Equals("0"))
-                    {
-                        newGO.isStatic = false;
-                        uTO.isStatic = false;
-                        behindGO.transform.parent = map_dynamic.transform;
-                    }
-
-                    GlobalMapEditor.mapObjectCount++;
+                    GlobalSettings.mapObjectCount++;
                 }
             }
         }
@@ -294,14 +263,14 @@ public class MapEditorEngine : MonoBehaviour
 
     private IEnumerator LoadCameraInfo()
     {
-        if (!System.IO.File.Exists(GlobalMapEditor.MapLevelsDir + newProjectName + ".map"))
+        if (!System.IO.File.Exists(GlobalSettings.MapLevelsDir + newProjectName + ".map"))
         {
             yield return StartCoroutine(SaveMap(newProjectName));
         }
 
-        if (System.IO.File.Exists(GlobalMapEditor.MapLevelsDir + newProjectName + ".map"))
+        if (System.IO.File.Exists(GlobalSettings.MapLevelsDir + newProjectName + ".map"))
         {
-            StreamReader sr = new StreamReader(GlobalMapEditor.MapLevelsDir + newProjectName + ".map");
+            StreamReader sr = new StreamReader(GlobalSettings.MapLevelsDir + newProjectName + ".map");
             string info = sr.ReadToEnd();
             sr.Close();
             MapData myData = JsonUtility.FromJson<MapData>(info);
@@ -338,32 +307,6 @@ public class MapEditorEngine : MonoBehaviour
         yield return 0;
     }
 
-    private IEnumerator EraserHandler()
-    {
-        while (true)
-        {
-            if (eraserIsEnabled)
-            {
-                Ray eraseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit eraseHit;
-
-                if (Physics.Raycast(eraseRay, out eraseHit, 1000))
-                {
-                    if (!eraseHit.collider.gameObject.name.Equals("Grid"))
-                    {
-                        UndoSystem.AddToUndoDestroy(eraseHit.collider.gameObject, eraseHit.collider.gameObject.name, eraseHit.collider.gameObject.transform.position, eraseHit.collider.gameObject.transform.localEulerAngles, true, eraseHit.collider.gameObject.transform.parent.gameObject);
-                        //Destroy (eraseHit.collider.gameObject);
-                        GlobalMapEditor.mapObjectCount--;
-                        hitObject = null;
-                        helpers_CANTBUILD.transform.position = new Vector3(-1000000.0f, 0.0f, -1000000.0f);
-                    }
-                }
-            }
-
-            yield return new WaitForSeconds(0.03f);
-        }
-    }
-
     private void Update()
     {
         if (notReady || EventSystem.current.IsPointerOverGameObject()/*防止鼠标操作穿透 UI*/)
@@ -380,16 +323,6 @@ public class MapEditorEngine : MonoBehaviour
         if (isCamGridMoving)
         {
             return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.LeftAlt))
-        {
-            isAltPressed = true;
-        }
-
-        if (Input.GetKeyUp(KeyCode.LeftAlt))
-        {
-            isAltPressed = false;
         }
 
         if (Input.GetKeyUp(KeyCode.F))
@@ -435,11 +368,6 @@ public class MapEditorEngine : MonoBehaviour
             }
         }
 
-        if (isAltPressed)
-        {
-            return;
-        }
-
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             inputFieldSearchBox.text = "";
@@ -469,29 +397,16 @@ public class MapEditorEngine : MonoBehaviour
 
         if (currentMode == MapEditorMode.Erase)
         {
-            if (Input.GetMouseButtonDown(0))
-            {
-                eraserIsEnabled = true;
-
-            }
-
-            if (Input.GetMouseButtonUp(0))
-            {
-                eraserIsEnabled = false;
-            }
-
             if (Input.GetMouseButtonDown(1))
             {
                 Ray eraseRay = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit eraseHit;
 
-                if (Physics.Raycast(eraseRay, out eraseHit, 1000))
+                if (Physics.Raycast(eraseRay, out RaycastHit eraseHit, 1000))
                 {
                     if (!eraseHit.collider.gameObject.name.Equals("Grid"))
                     {
-                        UndoSystem.AddToUndoDestroy(eraseHit.collider.gameObject, eraseHit.collider.gameObject.name, eraseHit.collider.gameObject.transform.position, eraseHit.collider.gameObject.transform.localEulerAngles, true, eraseHit.collider.gameObject.transform.parent.gameObject);
-                        //Destroy (eraseHit.collider.gameObject);
-                        GlobalMapEditor.mapObjectCount--;
+                        MapManager.Instance.DestroyBlock(eraseHit.collider.gameObject.GetComponent<TagMapObject>());
+                        GlobalSettings.mapObjectCount--;
                         hitObject = null;
                         helpers_CANTBUILD.transform.position = new Vector3(-1000000.0f, 0.0f, -1000000.0f);
                     }
@@ -736,7 +651,7 @@ public class MapEditorEngine : MonoBehaviour
                 {
                     isMouseDown = true;
 
-                    uMBE.massBuildStart(currentTile, currentObjectID, currentObjectGUID);
+                    uMBE.massBuildStart(currentTile, currentObjectGUID);
                 }
             }
             else
@@ -747,7 +662,7 @@ public class MapEditorEngine : MonoBehaviour
         }
 
         txtMapDescription.text = "Project [<color=green>" + newProjectName +
-            "</color>] Object Count [<color=green>" + GlobalMapEditor.mapObjectCount +
+            "</color>] Object Count [<color=green>" + GlobalSettings.mapObjectCount +
             "</color>] Tile [<color=green>" + ReturnGameObjectNameIfExists(currentTile) +
             "</color>] Grid [<color=green>" + globalGridSizeX + "x" + globalGridSizeZ + "</color>]";
         if (currentTile != null)
@@ -788,145 +703,6 @@ public class MapEditorEngine : MonoBehaviour
         yield return 0;
     }
 
-    public void ApplyBuild(GameObject tcObj = null, Vector3 tcPos = default(Vector3), string tcName = default(string), string tcGuid = default(string), Vector3 tcRot = default(Vector3))
-    {
-        GameObject newObj = null;
-        bool goodToGo = false;
-
-        if (tcObj != null)
-        {
-            Vector3 _pos = new Vector3(tcPos.x, tcPos.y, tcPos.z);
-
-            newObj = Instantiate(tcObj, _pos, tcObj.transform.rotation);
-
-            newObj.transform.localEulerAngles = tcRot;
-
-            goodToGo = true;
-        }
-        else
-        {
-            if (currentTile)
-            {
-                float newTileDistance = 1000.0f;
-                float newDistanceReq = 0.0f;
-
-                if (lastTile != null)
-                {
-                    Vector3 lastTilePos = lastTile.transform.position;
-                    Vector3 currentTilePos = currentTile.transform.position;
-
-                    float tileDistanceX = Mathf.Floor(Mathf.Abs(lastTilePos.x - currentTilePos.x));
-                    float tileDistanceZ = Mathf.Floor(Mathf.Abs(lastTilePos.z - currentTilePos.z));
-                    bool skip = false;
-
-                    if (tileDistanceX != 0.0f)
-                    {
-                        newTileDistance = tileDistanceX;
-                        newDistanceReq = currentTile.GetComponent<Collider>().bounds.size.x;
-                    }
-                    else if (tileDistanceZ != 0.0f)
-                    {
-                        newTileDistance = tileDistanceZ;
-                        newDistanceReq = currentTile.GetComponent<Collider>().bounds.size.z;
-                    }
-                    else
-                    {
-                        skip = true;
-                        goodToGo = false;
-                    }
-
-                    if (!skip)
-                    {
-                        if ((newTileDistance > newDistanceReq - 0.01f) && ((Mathf.Abs(lastTile.transform.position.y - currentTile.transform.position.y) < 0.01f)))
-                        {
-                            Vector3 _pos = new Vector3(currentTile.transform.position.x, currentTile.transform.position.y, currentTile.transform.position.z);
-
-                            newObj = Instantiate(currentTile, _pos, currentTile.transform.rotation);
-
-                            lastTile = newObj;
-
-                            goodToGo = true;
-                        }
-                        else
-                        {
-                            goodToGo = false;
-                        }
-                    }
-                }
-                else
-                {
-                    Vector3 _pos = new Vector3(currentTile.transform.position.x, currentTile.transform.position.y, currentTile.transform.position.z);
-
-                    newObj = Instantiate(currentTile, _pos, currentTile.transform.rotation);
-
-                    goodToGo = true;
-                }
-
-                if (lastTile == null)
-                {
-                    lastTile = newObj;
-                }
-            }
-        }
-
-        if ((currentTile || tcObj) && goodToGo)
-        {
-            newObj.layer = 0;
-            Destroy(newObj.GetComponent<Rigidbody>());
-            newObj.GetComponent<Collider>().isTrigger = false;
-
-            if (GlobalMapEditor.UndoSession == 2 || (GlobalMapEditor.UndoSession == 1))
-            {
-                undo_objs.Add(newObj);
-                undo_poss.Add(newObj.transform.position);
-                undo_rots.Add(newObj.transform.localEulerAngles);
-                undo_guids.Add(currentObjectGUID);
-            }
-
-            if (GlobalMapEditor.UndoSession == 2)
-            {
-                UndoSystem.AddToUndoMass(undo_objs, undo_guids, undo_poss, undo_rots);
-
-                undo_objs.Clear();
-                undo_poss.Clear();
-                undo_guids.Clear();
-                undo_rots.Clear();
-
-                GlobalMapEditor.UndoSession = 0;
-            }
-        }
-
-        if (goodToGo)
-        {
-            RoundTo90(newObj);
-
-            if (isCurrentStatic)
-            {
-                newObj.transform.parent = MAP_STATIC.transform;
-                newObj.isStatic = true;
-            }
-            else
-            {
-                newObj.transform.parent = MAP_DYNAMIC.transform;
-                newObj.isStatic = false;
-            }
-
-            if (tcObj != null)
-            {
-                newObj.name = tcName;
-            }
-            else
-            {
-                newObj.name = currentObjectID;
-            }
-        }
-
-        if (goodToGo)
-        {
-            GlobalMapEditor.mapObjectCount++;
-        }
-    }
-
     private IEnumerator ReloadTileAssets()
     {
         LoadGlobalSettings();
@@ -938,15 +714,12 @@ public class MapEditorEngine : MonoBehaviour
 
     private IEnumerator LoadTiles()
     {
-        GameObject TEMP_STATIC = new GameObject("static_objs");
-        TEMP_STATIC.isStatic = true;
         GameObject TEMP_DYNAMIC = new GameObject("dynamic_objs");
         GameObject TEMP = GameObject.Find("TEMP");
-        TEMP_STATIC.transform.parent = TEMP.transform;
         TEMP_DYNAMIC.transform.parent = TEMP.transform;
         TEMP.transform.position -= new Vector3(-1000000000.0f, 100000000.0f, -1000000000.0f);
 
-        StreamReader sr = new StreamReader(GlobalMapEditor.MapTilesPath);
+        StreamReader sr = new StreamReader(GlobalSettings.MapTilesPath);
         string json = sr.ReadToEnd();
         sr.Close();
         MapTilesData mapTilesData = JsonUtility.FromJson<MapTilesData>(json);
@@ -955,7 +728,6 @@ public class MapEditorEngine : MonoBehaviour
         {
             CategoryTilesData categoryTilesData = mapTilesData.categories[i];
             string cName = categoryTilesData.CategoryName;
-            string cType = "Dynamic";
             List<GameObject> cObjs = new List<GameObject>();
             List<Texture2D> cObjsP = new List<Texture2D>();
             List<string> cObjsNames = new List<string>();
@@ -972,23 +744,10 @@ public class MapEditorEngine : MonoBehaviour
                 cObjsPaths.Add(tileData.LoadPath);
                 GameObject tmp_tGO = Instantiate(tGO, Vector3.zero, new Quaternion(0, 0, 0, 0));
                 tmp_tGO.name = tileData.id;
-                List<GameObject> twoGO = new List<GameObject>();
-                twoGO = CreateColliderToObject(tmp_tGO);
-                GameObject behindGO = twoGO[0];
-                tGO = twoGO[1];
-                tGO.transform.parent = behindGO.transform;
+                GameObject behindGO = CreateColliderToObject(tmp_tGO);
                 behindGO.layer = 2;
                 cObjs.Add(behindGO);
-                if (cType.Equals("Static"))
-                {
-                    behindGO.transform.parent = TEMP_STATIC.transform;
-                    tmp_tGO.isStatic = true;
-                }
-                else if (cType.Equals("Dynamic"))
-                {
-                    behindGO.transform.parent = TEMP_DYNAMIC.transform;
-                    tmp_tGO.isStatic = false;
-                }
+                behindGO.transform.parent = TEMP_DYNAMIC.transform;
             }
 
             #region 按名称进行排序
@@ -1198,7 +957,7 @@ public class MapEditorEngine : MonoBehaviour
     }
 
     // 给 Instantiate 出来的 GameObject 加上一个 Box Collider (计算这个 model 在 x, y, z 三个方向的最大长度)
-    public List<GameObject> CreateColliderToObject(GameObject obj)
+    public GameObject CreateColliderToObject(GameObject obj)
     {
         float lowestPointY = 10000.0f;
         float highestPointY = -10000.0f;
@@ -1377,10 +1136,7 @@ public class MapEditorEngine : MonoBehaviour
         DisableAllExternalColliders(obj);
 
         // behindGO 只是一个 collider, obj 才是实际模型
-        List<GameObject> twoGO = new List<GameObject>();
-        twoGO.Add(behindGO);
-        twoGO.Add(obj);
-        return twoGO;
+        return behindGO;
     }
 
     private void DisableAllExternalColliders(GameObject obj)
@@ -1571,15 +1327,6 @@ public class MapEditorEngine : MonoBehaviour
         }
     }
 
-    private void RoundTo90(GameObject go)
-    {
-        Vector3 vec = go.transform.eulerAngles;
-        vec.x = Mathf.Round(vec.x / 90) * 90;
-        vec.y = Mathf.Round(vec.y / 90) * 90;
-        vec.z = Mathf.Round(vec.z / 90) * 90;
-        go.transform.eulerAngles = vec;
-    }
-
     private float RoundTo(float point, float toRound = 2.0f)
     {
         point *= toRound;
@@ -1620,13 +1367,8 @@ public class MapEditorEngine : MonoBehaviour
 
             GameObject obj = allObjects[i].gameObject;
             string objGUID = allObjects[i].objGUID;
-            bool objIsStatic = allObjects[i].isStatic;
-            string staticInfo = "0";
 
-            if (objIsStatic)
-                staticInfo = "1";
-
-            myData.blocks += objGUID + ":" + obj.transform.position.x + ":" + obj.transform.position.y + ":" + obj.transform.position.z + ":" + ((int)obj.transform.localEulerAngles.x) + ":" + ((int)obj.transform.localEulerAngles.y) + ":" + ((int)obj.transform.localEulerAngles.z) + ":" + staticInfo + ":0:-:default:$";
+            myData.blocks += objGUID + ":" + obj.transform.position.x + ":" + obj.transform.position.y + ":" + obj.transform.position.z + ":" + ((int)obj.transform.localEulerAngles.x) + ":" + ((int)obj.transform.localEulerAngles.y) + ":" + ((int)obj.transform.localEulerAngles.z) + ":0:0:-:default:$";
         }
 
         yield return 0;
@@ -1646,7 +1388,7 @@ public class MapEditorEngine : MonoBehaviour
         float mostBottom = 100000000.0f;
         float mostUp = -100000000.0f;
 
-        TagMapObject[] tS = MAP_STATIC.GetComponentsInChildren<TagMapObject>();
+        TagMapObject[] tS = MAP.GetComponentsInChildren<TagMapObject>();
 
         for (int i = 0; i < tS.Length; i++)
         {
@@ -1700,7 +1442,7 @@ public class MapEditorEngine : MonoBehaviour
 
         yield return 0;
 
-        StreamWriter sw = new StreamWriter(GlobalMapEditor.MapLevelsDir + mapName + ".map");
+        StreamWriter sw = new StreamWriter(GlobalSettings.MapLevelsDir + mapName + ".map");
         sw.Write("");
         sw.Write(JsonUtility.ToJson(myData));
         sw.Flush();
@@ -1748,27 +1490,17 @@ public class MapEditorEngine : MonoBehaviour
                         Destroy(currentTile);
                     }
 
-                    if (currentCatGo.transform.parent.gameObject.name.Equals("static_objs"))
-                    {
-                        isCurrentStatic = true;
-                    }
-                    else
-                    {
-                        isCurrentStatic = false;
-                    }
-
                     currentTile = Instantiate(currentCatGo, new Vector3(0.0f, 0.0f, 0.0f), currentCatGo.transform.rotation);
                     TagMapObject tempTag = currentTile.AddComponent<TagMapObject>();
                     tempTag.objGUID = currentCatGuid.ToString();
-                    tempTag.isStatic = isCurrentStatic;
                     currentTile.AddComponent<Rigidbody>();
                     currentTile.GetComponent<Rigidbody>().useGravity = false;
                     currentTile.GetComponent<BoxCollider>().size -= new Vector3(0.0000001f, 0.0000001f, 0.0000001f);
                     currentTile.GetComponent<Rigidbody>().constraints = RigidbodyConstraints.FreezeRotationX | RigidbodyConstraints.FreezeRotationY | RigidbodyConstraints.FreezeRotationZ | RigidbodyConstraints.FreezePositionX | RigidbodyConstraints.FreezePositionY | RigidbodyConstraints.FreezePositionZ;
                     currentTile.GetComponent<Collider>().isTrigger = true;
+                    // ignore raycast
                     currentTile.layer = 2;
-                    currentObjectID = currentCatName.ToString();
-                    currentTile.name = currentObjectID;
+                    currentTile.name = currentCatName.ToString();
                     currentObjectGUID = currentCatGuid.ToString();
 
                     helpers_CANTBUILD.transform.position = new Vector3(-1000, 0, -1000);

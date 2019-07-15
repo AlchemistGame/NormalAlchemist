@@ -19,28 +19,6 @@ public class GameMain : StateMachine
         StartCoroutine(Splash());
     }
 
-    private void Start()
-    {
-        InitScene();
-
-        ActorManager.Instance.NextTurn();
-    }
-
-    private void InitScene()
-    {
-        ActorInfo enemy_info = new ActorInfo();
-        enemy_info.name = "Enemy";
-        enemy_info.position = new Vector3(0.5f, 0, 8.5f);
-        enemy_info.rotation = new Vector3(0, 180, 0);
-        ActorManager.Instance.CreateActor("Model/UnityChan", "Enemy", enemy_info);
-
-        ActorInfo player_info = new ActorInfo();
-        player_info.name = "Player";
-        player_info.position = new Vector3(0.5f, 0, 0.5f);
-        player_info.rotation = new Vector3(0, 0, 0);
-        ActorManager.Instance.CreateActor("Model/UnityChan", "Friend", player_info);
-    }
-
     private List<BaseManager> listManager = null;
 
     public GameObject UIRender = null;
@@ -62,8 +40,6 @@ public class GameMain : StateMachine
 
         listManager = new List<BaseManager>();
         listManager.Add(UIManager.Instance);
-
-
 
 
         int initCount = 0;

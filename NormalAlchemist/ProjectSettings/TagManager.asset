@@ -4,9 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Ground
   - Enemy
   - Friend
+  - land
   layers:
   - Default
   - TransparentFX
