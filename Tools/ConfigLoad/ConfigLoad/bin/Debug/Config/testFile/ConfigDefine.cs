@@ -4,7 +4,7 @@ namespace DataConfig
 {
     public enum templeteXLSXId
     {
-        burning = 1,
+        burning = 2,
     }
     public class templeteXLSX
     {
