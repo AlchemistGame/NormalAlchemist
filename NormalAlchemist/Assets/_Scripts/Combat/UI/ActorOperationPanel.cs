@@ -24,6 +24,9 @@ public class ActorOperationPanel : MonoBehaviour
 
     public void ClearActorData()
     {
+        MoveBtn.gameObject.SetActive(false);
+        NormalAttackBtn.gameObject.SetActive(false);
+        FinishOperationBtn.gameObject.SetActive(false);
         ActorName.text = string.Empty;
 
         for (int i = 0; i < cardItemList.Count; i++)
@@ -41,6 +44,9 @@ public class ActorOperationPanel : MonoBehaviour
     #region private Methods
     private void InitInfoPanel(ActorData actorData)
     {
+        MoveBtn.gameObject.SetActive(true);
+        NormalAttackBtn.gameObject.SetActive(true);
+        FinishOperationBtn.gameObject.SetActive(true);
         ActorName.text = actorData.name;
     }
 
@@ -59,9 +65,9 @@ public class ActorOperationPanel : MonoBehaviour
 
     private void BindingActorEvents(ActorData actor)
     {
-        MoveBtn.onClick.AddListener(actor.OnMove);
-        NormalAttackBtn.onClick.AddListener(actor.OnNormalAttack);
-        FinishOperationBtn.onClick.AddListener(actor.OnFinishOperation);
+        MoveBtn.onClick.AddListener(() => EventManager.Broadcast(EventsEnum.PreMoveActor));
+        NormalAttackBtn.onClick.AddListener(() => EventManager.Broadcast(EventsEnum.DoAttackActor));
+        FinishOperationBtn.onClick.AddListener(() => EventManager.Broadcast(EventsEnum.DoFinishOperation));
     }
     #endregion
 }

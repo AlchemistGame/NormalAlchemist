@@ -60,20 +60,11 @@ namespace MyBattle
             }
         }
 
-        public List<Vector3> GetPathFromStartToEnd(Vector3 startPosition, Vector3 endPosition)
+        public List<GridUnitData> GetPathFromStartToEnd(Int3 startCoord, Int3 endCoord)
         {
-            GridUnitData startNode = GetGridUnitDataFromWorldPos(startPosition);
-            GridUnitData endNode = GetGridUnitDataFromWorldPos(endPosition);
-
-            List<Vector3> movingPath = new List<Vector3>();
-
-            List<GridUnitData> movingNodeList = Pathfinder.RequestPathfind(startNode, endNode);
-            foreach (var node in movingNodeList)
-            {
-                movingPath.Add(GridCoordToWorldPos(node.gridCoord));
-            }
-
-            return movingPath;
+            GridUnitData startNode = GetGridUnitDataFrom2DCoord(startCoord.x, startCoord.z);
+            GridUnitData endNode = GetGridUnitDataFrom2DCoord(endCoord.x, endCoord.z);
+            return PathFinder.RequestPathfind(startNode, endNode);
         }
 
         #region public API
@@ -133,6 +124,19 @@ namespace MyBattle
         {
             Int3 gridCoord = WorldPosToGridCoord(pos);
             return GetGridUnitDataFromGridCoord(gridCoord);
+        }
+
+        public GridUnitData GetGridUnitDataFrom2DCoord(int x, int z)
+        {
+            GridUnitData retVal = null;
+
+            if (x >= 0 && x < Instance.gridUnitMapData.GetLength(0) &&
+                z >= 0 && z < Instance.gridUnitMapData.GetLength(2))
+            {
+                retVal = Instance.gridUnitMapData[x, Instance.gridUnitMapData.GetLength(1) - 1, z];
+            }
+
+            return retVal;
         }
 
         public static GridUnitData GridUnitRaycast(Ray ray, float range)

@@ -27,19 +27,15 @@ namespace MyBattle
                 return;
             }
 
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit))
+            if (Input.GetMouseButtonDown(0))
             {
-                if (hit.collider.tag.Equals(TagDefine.land))
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    Vector3 hitPosition = hit.point;
-
-                    if (Input.GetMouseButtonDown(0))
+                    GridUnit gu = hit.collider.GetComponent<GridUnit>();
+                    if (gu != null && gu.OnTargetSelect != null)
                     {
-                        BattleManager.Instance.targetCoord = GridMapManager.WorldPosToGridCoord(hitPosition);
-
-                        BattleManager.Instance.ChangeState<GenerateActorState>();
+                        gu.OnTargetSelect(BattleManager.Instance.ChangeState<GenerateActorState>);
                     }
                 }
             }

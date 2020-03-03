@@ -13,6 +13,15 @@ namespace MyBattle
             z = tempZ;
         }
 
+        public static Int3 operator +(Int3 lhs, Int3 rhs)
+        {
+            Int3 retValue = new Int3(lhs.x, lhs.y, lhs.z);
+            retValue.x += rhs.x;
+            retValue.y += rhs.y;
+            retValue.z += rhs.z;
+            return retValue;
+        }
+
         public static bool operator ==(Int3 lhs, Int3 rhs)
         {
             bool status = false;
@@ -103,7 +112,7 @@ namespace MyBattle
             }
         }
 
-        public Vector3 WorldCoord
+        public Vector3 WorldPos
         {
             get
             {
@@ -123,6 +132,7 @@ namespace MyBattle
                     instanceGU = Object.Instantiate(loadGU);
                     instanceGU.name = gridCoord.ToString();
                     instanceGU.transform.parent = GridMapManager.Instance.transform;
+                    instanceGU.Init(this);
                     RefreshInstance();
                 }
             }
@@ -164,5 +174,14 @@ namespace MyBattle
         {
             gridState = GridState.normal;
         }
+
+        #region Public 接口
+        public void OnTargetSelect(System.Action action)
+        {
+            BattleManager.Instance.targetCoord = gridCoord;
+
+            action?.Invoke();
+        }
+        #endregion
     }
 }

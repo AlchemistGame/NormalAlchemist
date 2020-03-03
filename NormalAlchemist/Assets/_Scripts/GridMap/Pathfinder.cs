@@ -4,51 +4,42 @@ using UnityEngine;
 // A* search algorithm
 namespace MyBattle
 {
-    public class Pathfinder
+    public class PathFinder
     {
-        public GridUnitData startPosition;
-        public GridUnitData endPosition;
+        private static PathFinder pathFinder;
+        private static PathFinder Instance
+        {
+            get
+            {
+                if (pathFinder == null)
+                {
+                    pathFinder = new PathFinder();
+                }
 
-        List<GridUnitData> foundPath;
+                return pathFinder;
+            }
+        }
 
         public static List<GridUnitData> RequestPathfind(GridUnitData start, GridUnitData target)
         {
-            Pathfinder newJob = new Pathfinder(start, target);
-            return newJob.FindPath();
+            return Instance.FindPath(start, target);
         }
 
-        //Constructor
-        public Pathfinder(GridUnitData start, GridUnitData target)
-        {
-            startPosition = start;
-            endPosition = target;
-        }
-
-        public List<GridUnitData> FindPath()
-        {
-            foundPath = FindPathActual(startPosition, endPosition);
-            return foundPath;
-        }
-
-        private List<GridUnitData> FindPathActual(GridUnitData start, GridUnitData target)
+        private List<GridUnitData> FindPath(GridUnitData start, GridUnitData target)
         {
             List<GridUnitData> foundPath = new List<GridUnitData>();
 
-            //We need two lists, one for the nodes we need to check and one for the nodes we've already checked
-            List<GridUnitData> openSet = new List<GridUnitData>();
             HashSet<GridUnitData> closedSet = new HashSet<GridUnitData>();
+            closedSet.Add(start);   // 出发点肯定是最终路径的一部分
 
-            //We start adding to the open set
+            List<GridUnitData> openSet = new List<GridUnitData>();
             openSet.Add(start);
-
             while (openSet.Count > 0)
             {
                 GridUnitData currentNode = openSet[0];
 
                 for (int i = 0; i < openSet.Count; i++)
                 {
-                    //We check the costs for the current node
-                    //You can have more opt. here but that's not important now
                     if (openSet[i].fCost < currentNode.fCost ||
                         (openSet[i].fCost == currentNode.fCost &&
                         openSet[i].hCost < currentNode.hCost))
@@ -74,7 +65,7 @@ namespace MyBattle
                 }
 
                 //if we haven't reached our target, then we need to start looking the neighbours
-                foreach (GridUnitData neighbour in GetNeighbours(currentNode, true))
+                foreach (GridUnitData neighbour in GetNeighbours(currentNode))
                 {
                     if (!closedSet.Contains(neighbour))
                     {
@@ -122,54 +113,46 @@ namespace MyBattle
             return path;
         }
 
-        private List<GridUnitData> GetNeighbours(GridUnitData node, bool getVerticalneighbours = false)
+        private List<GridUnitData> GetNeighbours(GridUnitData node, bool getVerticalNeighbours = false)
         {
             //This is were we start taking our neighbours
             List<GridUnitData> retList = new List<GridUnitData>();
 
-            for (int x = -1; x <= 1; x++)
+            // + new Int3(0, 0, 0) is the current node
+            for (int step = -1; step <= 1; step += 1)
             {
-                for (int yIndex = -1; yIndex <= 1; yIndex++)
+                Int3 searchPos = new Int3();
+
+                searchPos = node.gridCoord + new Int3(step, 0, 0);
+                GridUnitData newNode = GetNeighbourNode(searchPos, true, node);
+                if (newNode != null)
                 {
-                    for (int z = -1; z <= 1; z++)
+                    retList.Add(newNode);
+                }
+
+                //If we don't want a 3d A*, then we don't search the y
+                if (getVerticalNeighbours)
+                {
+                    searchPos = node.gridCoord + new Int3(0, step, 0);
+                    newNode = GetNeighbourNode(searchPos, true, node);
+                    if (newNode != null)
                     {
-                        int y = yIndex;
-
-                        //If we don't want a 3d A*, then we don't search the y
-                        if (!getVerticalneighbours)
-                        {
-                            y = 0;
-                        }
-
-                        if (x == 0 && y == 0 && z == 0)
-                        {
-                            //000 is the current node
-                        }
-                        else
-                        {
-                            GridUnitData searchPos = new GridUnitData();
-
-                            //the nodes we want are what's forward/backwars,left/righ,up/down from us
-                            searchPos.gridCoord.x = node.gridCoord.x + x;
-                            searchPos.gridCoord.y = node.gridCoord.y + y;
-                            searchPos.gridCoord.z = node.gridCoord.z + z;
-
-                            GridUnitData newNode = GetNeighbourNode(searchPos, true, node);
-
-                            if (newNode != null)
-                            {
-                                retList.Add(newNode);
-                            }
-                        }
+                        retList.Add(newNode);
                     }
+                }
+
+                searchPos = node.gridCoord + new Int3(0, 0, step);
+                newNode = GetNeighbourNode(searchPos, true, node);
+                if (newNode != null)
+                {
+                    retList.Add(newNode);
                 }
             }
 
             return retList;
-
         }
 
-        private GridUnitData GetNeighbourNode(GridUnitData adjPos, bool searchTopDown, GridUnitData currentNodePos)
+        private GridUnitData GetNeighbourNode(Int3 adjPos, bool searchTopDown, GridUnitData currentNodePos)
         {
             //this is where the meat of it is
             //We can add all the checks we need here to tweak the algorythm to our heart's content
@@ -178,7 +161,7 @@ namespace MyBattle
             GridUnitData retVal = null;
 
             //let's take the node from the adjacent positions we passed
-            GridUnitData node = GridMapManager.GetGridUnitDataFromGridCoord(adjPos.gridCoord);
+            GridUnitData node = GridMapManager.GetGridUnitDataFromGridCoord(adjPos);
 
             //if it's not null and we can walk on it
             if (node != null && node.IsWalkable)
@@ -189,8 +172,8 @@ namespace MyBattle
             else if (searchTopDown)//and we want to have 3d A* 
             {
                 //then look what the adjacent node have under him
-                adjPos.gridCoord.y -= 1;
-                GridUnitData bottomBlock = GridMapManager.GetGridUnitDataFromGridCoord(adjPos.gridCoord);
+                adjPos.y -= 1;
+                GridUnitData bottomBlock = GridMapManager.GetGridUnitDataFromGridCoord(adjPos);
 
                 //if there is a bottom block and we can walk on it
                 if (bottomBlock != null && bottomBlock.IsWalkable)
@@ -200,8 +183,8 @@ namespace MyBattle
                 else
                 {
                     //otherwise, we look what it has on top of it
-                    adjPos.gridCoord.y += 2;
-                    GridUnitData topBlock = GridMapManager.GetGridUnitDataFromGridCoord(adjPos.gridCoord);
+                    adjPos.y += 2;
+                    GridUnitData topBlock = GridMapManager.GetGridUnitDataFromGridCoord(adjPos);
                     if (topBlock != null && topBlock.IsWalkable)
                     {
                         retVal = topBlock;
@@ -211,8 +194,8 @@ namespace MyBattle
 
             //if the node is diagonal to the current node then check the neighbouring nodes
             //so to move diagonally, we need to have 4 nodes walkable
-            int originalX = adjPos.gridCoord.x - currentNodePos.gridCoord.x;
-            int originalZ = adjPos.gridCoord.z - currentNodePos.gridCoord.z;
+            int originalX = adjPos.x - currentNodePos.gridCoord.x;
+            int originalZ = adjPos.z - currentNodePos.gridCoord.z;
 
             if (Mathf.Abs(originalX) == 1 && Mathf.Abs(originalZ) == 1)
             {

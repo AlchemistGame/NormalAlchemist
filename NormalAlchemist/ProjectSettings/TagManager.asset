@@ -6,7 +6,6 @@ TagManager:
   tags:
   - Enemy
   - Friend
-  - land
   layers:
   - Default
   - TransparentFX

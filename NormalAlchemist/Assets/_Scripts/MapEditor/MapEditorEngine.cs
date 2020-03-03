@@ -32,12 +32,8 @@ public class MapEditorEngine : MonoBehaviour
 
     private int isRotated;
     private int isRotatedH;
-    private bool is2D;
-    private bool isOrtho;
     private bool canBuild;
-    private bool isCamGridMoving;
     private bool isMouseDown;
-    private bool isInTopView;
     [HideInInspector]
     public string newProjectName;
     [HideInInspector]
@@ -49,7 +45,6 @@ public class MapEditorEngine : MonoBehaviour
 
     // info
     private float globalYSize;
-    private string cameraType;
     private int globalGridSizeX;
     private int globalGridSizeZ;
     private Vector3 gridsize;
@@ -60,19 +55,12 @@ public class MapEditorEngine : MonoBehaviour
     private UndoSystem UndoSystem;
     private int currentLayer;
     private string currentObjectGUID;
-    private Vector3 startingCameraTransform;
     private List<int> rotationList = new List<int>();
     private bool passSaveA;
     private bool passSaveB;
 
-    // load camera info
-    private Vector3 loadCameraPosition;
-    private Vector3 loadCameraRotation;
-
     // map objects
     private GameObject MAP;
-    private GameObject MAIN;
-    private GameObject cameraGO;
     private List<CatInfo> allTiles = new List<CatInfo>();
     private List<GameObject> currentCategoryGoes = new List<GameObject>();
     private List<Texture2D> currentCategoryPrevs = new List<Texture2D>();
@@ -83,7 +71,6 @@ public class MapEditorEngine : MonoBehaviour
     [HideInInspector]
     public GameObject grid;
     private GameObject hitObject;
-    private float cameraSensitivity;
 
     // UI objects
     private List<GameObject> undo_objs = new List<GameObject>();
@@ -95,8 +82,6 @@ public class MapEditorEngine : MonoBehaviour
     private GameObject helpers_CANTBUILD;
     private GameObject helpers_CANBUILD;
 
-    // other
-    private CameraMoveController cameraMove;
     private bool isCastShadows;
 
     public class CatInfo : System.IDisposable
@@ -161,14 +146,11 @@ public class MapEditorEngine : MonoBehaviour
         currentMode = MapEditorMode.Place;
         passSaveA = false;
         passSaveB = false;
-        isInTopView = false;
         lastTile = null;
         currentLayer = 0;
         isMouseDown = false;
-        isCamGridMoving = false;
         notReady = true;
         canBuild = false;
-        cameraGO = GameObject.Find("MapEditorCamera");
         gridsize = new Vector3(1000.0f, 0.1f, 1000.0f);
         currentObjectGUID = "";
 
@@ -194,7 +176,6 @@ public class MapEditorEngine : MonoBehaviour
         if (isItLoad)
         {
             yield return StartCoroutine(LoadMap(newProjectName, MAP));
-            yield return StartCoroutine(LoadCameraInfo());
             notReady = false;
         }
         else
@@ -261,51 +242,7 @@ public class MapEditorEngine : MonoBehaviour
         yield return 0;
     }
 
-    private IEnumerator LoadCameraInfo()
-    {
-        if (!System.IO.File.Exists(GlobalSettings.MapLevelsDir + newProjectName + ".map"))
-        {
-            yield return StartCoroutine(SaveMap(newProjectName));
-        }
 
-        if (System.IO.File.Exists(GlobalSettings.MapLevelsDir + newProjectName + ".map"))
-        {
-            StreamReader sr = new StreamReader(GlobalSettings.MapLevelsDir + newProjectName + ".map");
-            string info = sr.ReadToEnd();
-            sr.Close();
-            MapData myData = JsonUtility.FromJson<MapData>(info);
-
-            GameObject _YArea = GameObject.Find("MAIN/YArea");
-
-            if (myData.settings != "")
-            {
-                string[] allinfo = myData.settings.Split(":"[0]);
-                // main pos
-                float pX = System.Convert.ToSingle(allinfo[0]);
-                float pY = System.Convert.ToSingle(allinfo[1]);
-                float pZ = System.Convert.ToSingle(allinfo[2]);
-                // main rot
-                float _main_rX = System.Convert.ToSingle(allinfo[3]);
-                float _main_rY = System.Convert.ToSingle(allinfo[4]);
-                float _main_rZ = System.Convert.ToSingle(allinfo[5]);
-                // yarea rot
-                float _yarea_rX = System.Convert.ToSingle(allinfo[6]);
-                float _yarea_rY = System.Convert.ToSingle(allinfo[7]);
-                float _yarea_rZ = System.Convert.ToSingle(allinfo[8]);
-                // mapeditorcamera rot
-                float _mapeditorcamera_rX = System.Convert.ToSingle(allinfo[9]);
-                float _mapeditorcamera_rY = System.Convert.ToSingle(allinfo[10]);
-                float _mapeditorcamera_rZ = System.Convert.ToSingle(allinfo[11]);
-
-                MAIN.transform.position = new Vector3(pX, pY, pZ);
-                MAIN.transform.localEulerAngles = new Vector3(_main_rX, _main_rY, _main_rZ);
-                _YArea.transform.localEulerAngles = new Vector3(_yarea_rX, _yarea_rY, _yarea_rZ);
-                cameraGO.transform.localEulerAngles = new Vector3(_mapeditorcamera_rX, _mapeditorcamera_rY, _mapeditorcamera_rZ);
-            }
-        }
-
-        yield return 0;
-    }
 
     private void Update()
     {
@@ -318,11 +255,6 @@ public class MapEditorEngine : MonoBehaviour
             {
                 return;
             }
-        }
-
-        if (isCamGridMoving)
-        {
-            return;
         }
 
         if (Input.GetKeyUp(KeyCode.F))
@@ -414,36 +346,16 @@ public class MapEditorEngine : MonoBehaviour
             }
         }
 
-        if (!isCamGridMoving)
+        if (Input.GetKeyDown(KeyCode.T))
         {
-            if (Input.GetKeyUp(KeyCode.C))
+            if (currentTile)
             {
-                StartCoroutine(gridSmoothMove(grid, true, cameraMove.gameObject));
-            }
-            else if (Input.GetKeyUp(KeyCode.X))
-            {
-                StartCoroutine(gridSmoothMove(grid, false, cameraMove.gameObject));
+                Destroy(currentTile);
+                helpers_CANTBUILD.transform.position = new Vector3(-1000000.0f, 0.0f, -1000000.0f);
             }
 
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                ResetCamera();
-            }
-
-            if (Input.GetKeyDown(KeyCode.T))
-            {
-                if (currentTile)
-                {
-                    Destroy(currentTile);
-                    helpers_CANTBUILD.transform.position = new Vector3(-1000000.0f, 0.0f, -1000000.0f);
-                }
-
-                currentMode = MapEditorMode.Erase;
-            }
+            currentMode = MapEditorMode.Erase;
         }
-
-        if (isCamGridMoving)
-            return;
 
         if (Input.GetKeyDown(KeyCode.LeftCommand))
         {
@@ -709,7 +621,6 @@ public class MapEditorEngine : MonoBehaviour
         LoadTools();
         yield return StartCoroutine(LoadTiles());
         LoadTilesIntoGUI();
-        FinalizeGridAndCamera();
     }
 
     private IEnumerator LoadTiles()
@@ -820,10 +731,6 @@ public class MapEditorEngine : MonoBehaviour
 
     private void LoadTools()
     {
-        MAIN = new GameObject("MAIN");
-        cameraMove = MAIN.AddComponent<CameraMoveController>();
-        cameraMove.cameraSensitivity = cameraSensitivity;
-
         GameObject _grid = (GameObject)Resources.Load("uteForEditor/uteLayer");
         grid = Instantiate(_grid, new Vector3((gridsize.x / 2) + 0.5f, -0.5f, (gridsize.z / 2) + 0.5f), _grid.transform.rotation);
         grid.name = "Grid";
@@ -847,12 +754,7 @@ public class MapEditorEngine : MonoBehaviour
             new Vector2(0,0), new Vector2(0,globalGridSizeZ), new Vector2(globalGridSizeX,globalGridSizeZ), new Vector2(globalGridSizeX,0),
         };
 
-        cameraMove.gameObject.transform.position = Vector3.zero;
         MAP = GameObject.Find("MAP");
-        GameObject.Find("MapEditorCamera").transform.parent = MAIN.transform;
-        GameObject.Find("MapEditorCamera").transform.position = Vector3.zero;
-
-        SetCamera(cameraType);
     }
 
     private void LoadTilesIntoGUI()
@@ -873,87 +775,7 @@ public class MapEditorEngine : MonoBehaviour
         globalGridSizeX = 1024;
         globalGridSizeZ = 1024;
 
-        //Add("isometric-perspective");
-        //Add("isometric-ortho");
-        //Add("2d-perspective");
-        //Add("2d-ortho");
-        cameraType = "isometric-perspective";
-
         globalYSize = 1.0f;
-        cameraSensitivity = 1.0f;
-    }
-
-    private void SetCamera(string camType)
-    {
-        GameObject rotationArea = new GameObject("YArea");
-        cameraGO.transform.parent = rotationArea.transform;
-        rotationArea.transform.parent = MAIN.transform;
-        cameraGO.transform.position = Vector3.zero;
-        Camera camTemp = cameraGO.GetComponent<Camera>();
-
-        if (camType.Equals("isometric-perspective"))
-        {
-            MAIN.transform.localEulerAngles = new Vector3(0, 45, 0);
-            cameraGO.transform.localEulerAngles = new Vector3(30, 0, 0);
-            camTemp.orthographic = false;
-            camTemp.fieldOfView = 60;
-            camTemp.farClipPlane = 1000.0f;
-            isOrtho = false;
-            is2D = false;
-        }
-        else if (camType.Equals("isometric-ortho"))
-        {
-            MAIN.transform.localEulerAngles = new Vector3(0, 45, 0);
-            cameraGO.transform.localEulerAngles = new Vector3(30, 0, 0);
-            camTemp.orthographic = true;
-            camTemp.orthographicSize = 5;
-            camTemp.nearClipPlane = -100.0f;
-            camTemp.farClipPlane = 1000.0f;
-            is2D = false;
-            isOrtho = true;
-        }
-        else if (camType.Equals("2d-perspective"))
-        {
-            MAIN.transform.localEulerAngles = new Vector3(0, 0, 0);
-            camTemp.orthographic = false;
-            camTemp.nearClipPlane = 0.1f;
-            camTemp.farClipPlane = 1000.0f;
-            isOrtho = false;
-            is2D = true;
-        }
-        else if (camType.Equals("2d-ortho"))
-        {
-            MAIN.transform.localEulerAngles = new Vector3(0, 0, 0);
-            camTemp.orthographic = true;
-            camTemp.orthographicSize = 5;
-            camTemp.nearClipPlane = -10.0f;
-            camTemp.farClipPlane = 300.0f;
-            isOrtho = true;
-            is2D = true;
-        }
-    }
-
-    private void FinalizeGridAndCamera()
-    {
-        if (is2D)
-        {
-            cameraMove.is2D = true;
-            cameraGO.transform.Rotate(new Vector3(90, 0, 0));
-            MAIN.transform.position = new Vector3(500, 14, 490);
-        }
-        else
-        {
-            cameraMove.is2D = false;
-
-            if (isOrtho)
-            {
-                MAIN.transform.position = new Vector3(492, 8, 492);
-            }
-            else
-            {
-                MAIN.transform.position = new Vector3(493, 8, 493);
-            }
-        }
     }
 
     // 给 Instantiate 出来的 GameObject 加上一个 Box Collider (计算这个 model 在 x, y, z 三个方向的最大长度)
@@ -1174,32 +996,6 @@ public class MapEditorEngine : MonoBehaviour
         }
     }
 
-    private void ShowTopView()
-    {
-        if (!isInTopView)
-        {
-            MAIN.transform.position += new Vector3(0, 5, 0);
-        }
-
-        isInTopView = true;
-        cameraMove.isInTopView = true;
-        MAIN.transform.localEulerAngles = new Vector3(MAIN.transform.localEulerAngles.x, 0, MAIN.transform.localEulerAngles.z);
-        GameObject cameraYRot = GameObject.Find("MAIN/YArea");
-        cameraYRot.transform.localEulerAngles = new Vector3(0, 0, 0);
-        cameraGO.transform.localEulerAngles = new Vector3(90, cameraGO.transform.localEulerAngles.y, cameraGO.transform.localEulerAngles.z);
-    }
-
-    private IEnumerator TurnCamera90(int iternation, int count)
-    {
-        for (int i = 0; i < iternation; i++)
-        {
-            MAIN.transform.Rotate(new Vector3(0, count, 0));
-            yield return 0;
-        }
-
-        yield return 0;
-    }
-
     private string ReturnGameObjectNameIfExists(GameObject obj)
     {
         if (obj)
@@ -1244,86 +1040,6 @@ public class MapEditorEngine : MonoBehaviour
             {
                 isRotatedH = 0;
             }
-        }
-    }
-
-    private IEnumerator gridSmoothMove(GameObject gridObj, bool isUp, GameObject cam)
-    {
-        canBuild = false;
-        isCamGridMoving = true;
-
-        Vector3 endP = gridObj.transform.position;
-        Vector3 camEP = cam.transform.position;
-        Vector3 startP = gridObj.transform.position;
-        Vector3 startEP = cam.transform.position;
-
-        if (isUp)
-        {
-            currentLayer++;
-            endP += new Vector3(0.0f, globalYSize, 0.0f);
-            camEP += new Vector3(0.0f, globalYSize, 0.0f);
-        }
-        else
-        {
-            currentLayer--;
-            endP -= new Vector3(0.0f, globalYSize, 0.0f);
-            camEP -= new Vector3(0.0f, globalYSize, 0.0f);
-        }
-
-        while (true)
-        {
-            gridObj.transform.position = Vector3.Lerp(gridObj.transform.position, endP, Time.deltaTime * 20.0f);
-            cam.transform.position = Vector3.Lerp(cam.transform.position, camEP, Time.deltaTime * 20.0f);
-
-            float dist = Vector3.Distance(gridObj.transform.position, endP);
-
-            if (Mathf.Abs(dist) <= 0.1f)
-            {
-                gridObj.transform.position = endP;
-                cam.transform.position = camEP;
-                break;
-            }
-
-            yield return null;
-        }
-
-        if (isUp)
-        {
-            gridObj.transform.position = startP + new Vector3(0.0f, globalYSize, 0.0f);
-            cam.transform.position = startEP + new Vector3(0.0f, globalYSize, 0.0f);
-        }
-        else
-        {
-            gridObj.transform.position = startP - new Vector3(0.0f, globalYSize, 0.0f);
-            cam.transform.position = startEP - new Vector3(0.0f, globalYSize, 0.0f);
-        }
-
-        yield return 0;
-        canBuild = true;
-        isCamGridMoving = false;
-    }
-
-    private void ResetCamera()
-    {
-        if (isInTopView)
-        {
-            cameraMove.isInTopView = false;
-            isInTopView = false;
-            MAIN.transform.position -= new Vector3(0, 5, 0);
-        }
-
-        GameObject cameraYRot = GameObject.Find("MAIN/YArea");
-        cameraYRot.transform.localEulerAngles = Vector3.zero;
-
-        if (is2D)
-        {
-            cameraGO.transform.localEulerAngles = new Vector3(90, 0, 0);
-            MAIN.transform.localEulerAngles = Vector3.zero;
-        }
-        else
-        {
-            MAIN.transform.localEulerAngles = new Vector3(0, 45, 0);
-            cameraGO.transform.localEulerAngles = new Vector3(30, 0, 0);
         }
     }
 
@@ -1373,12 +1089,7 @@ public class MapEditorEngine : MonoBehaviour
 
         yield return 0;
 
-        GameObject MAIN = GameObject.Find("MAIN");
-        GameObject YArea = GameObject.Find("MAIN/YArea");
-        GameObject MapEditorCamera = GameObject.Find("MAIN/YArea/MapEditorCamera");
-        myData.settings = MAIN.transform.position.x + ":" + MAIN.transform.position.y + ":" + MAIN.transform.position.z + ":" + MAIN.transform.localEulerAngles.x + ":" + MAIN.transform.localEulerAngles.y + ":" + MAIN.transform.localEulerAngles.z + ":" + YArea.transform.localEulerAngles.x + ":" + YArea.transform.localEulerAngles.y + ":" + YArea.transform.localEulerAngles.z + ":" + MapEditorCamera.transform.localEulerAngles.x + ":" + MapEditorCamera.transform.localEulerAngles.y + ":" + MapEditorCamera.transform.localEulerAngles.z + ":";
-
-        yield return 0;
+        // 保存摄像机信息
 
         #region GetMapBoundsInfo
         float mostLeft = 100000000.0f;

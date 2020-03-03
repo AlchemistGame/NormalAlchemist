@@ -12,8 +12,6 @@ namespace MyBattle
         public ActorData currentActor;
         public event UpdateEventHandler OnUpdate;
         [HideInInspector]
-        public Vector3 targetPosition;
-        [HideInInspector]
         public Int3 targetCoord;
         public static BattleManager Instance { get; private set; }
         [SerializeField]
@@ -29,6 +27,10 @@ namespace MyBattle
 
             turnOrderController = new TurnOrderController();
             turnOrderEnumerator = turnOrderController.Tick();
+
+            EventManager.Register(EventsEnum.PreMoveActor, this, "PreMoveActor");
+            EventManager.Register(EventsEnum.DoAttackActor, this, "DoAttackActor");
+            EventManager.Register(EventsEnum.DoFinishOperation, this, "DoFinishOperation");
         }
 
         private void Start()
@@ -50,10 +52,10 @@ namespace MyBattle
             GridMapManager.Instance.GenerateGridMap();
 
             // 生成一个主角
-            AddActorToBattleField("Model/UnityChan", "Friend", "主角", new Int3(20, 0, 20), 50);
+            AddActorToBattleField("CharacterModel/UnityChan", "Friend", "主角", new Int3(20, 1, 20), 50);
 
             // 生成一个敌人
-            //AddActorToBattleField("Model/UnityChan", "Enemy", "敌人", new Int3(5, 0, 8));
+            //AddActorToBattleField("CharacterModel/UnityChan", "Enemy", "敌人", new Int3(5, 0, 8));
         }
 
         public void NextTurn()
@@ -128,6 +130,21 @@ namespace MyBattle
         {
             ActorData actor = ActorManager.Instance.CreateActor(model_path, tag, name, coord, speed);
             turnOrderController.AddActor(actor);
+        }
+
+        public void PreMoveActor()
+        {
+            ChangeState<PreMoveState>();
+        }
+
+        public void DoAttackActor()
+        {
+            ChangeState<ActorAttackState>();
+        }
+
+        public void DoFinishOperation()
+        {
+            ChangeState<AfterTurnState>();
         }
     }
 }

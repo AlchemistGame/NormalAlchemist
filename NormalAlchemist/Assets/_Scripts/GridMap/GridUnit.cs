@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace MyBattle
 {
@@ -6,10 +7,16 @@ namespace MyBattle
     {
         public Material[] gridTypeMaterials;
         public Material[] gridStateMaterials;
+        public Action<Action> OnTargetSelect;
+
+        public void Init(GridUnitData data)
+        {
+            this.OnTargetSelect += data.OnTargetSelect;
+        }
 
         public void Refresh(GridUnitData data)
         {
-            transform.position = data.WorldCoord;
+            transform.position = data.WorldPos;
 
             switch (data.gridState)
             {
@@ -23,5 +30,7 @@ namespace MyBattle
                     break;
             }
         }
+
+
     }
 }

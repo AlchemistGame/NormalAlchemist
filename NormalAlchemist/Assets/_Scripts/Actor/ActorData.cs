@@ -9,11 +9,34 @@ namespace MyBattle
     public class ActorData
     {
         public string name;
-        public Int3 coord;
+        public Int3 gridCoord;
         public int HP = 100;
         public int speed = 100; // 行动速度
         public List<CardData> OwnedCards { get; private set; }
         public Actor sceneObject;
+
+        public ActorData(string name, Int3 coord, int speed, Actor actor)
+        {
+            this.name = name;
+            this.gridCoord = coord;
+            this.speed = speed;
+            this.sceneObject = actor;
+
+            OwnedCards = new List<CardData>();
+        }
+
+        #region 公共属性
+        public Vector3 DisplayPos
+        {
+            get
+            {
+                return sceneObject.transform.position;
+            }
+            set
+            {
+                sceneObject.transform.position = value;
+            }
+        }
 
         public bool IsDead
         {
@@ -22,16 +45,7 @@ namespace MyBattle
                 return HP <= 0;
             }
         }
-
-        public ActorData(string name, Int3 coord, int speed, Actor actor)
-        {
-            this.name = name;
-            this.coord = coord;
-            this.speed = speed;
-            this.sceneObject = actor;
-
-            OwnedCards = new List<CardData>();
-        }
+        #endregion
 
         #region 子类继承的接口
         protected virtual void Update()
@@ -51,21 +65,6 @@ namespace MyBattle
         #endregion
 
         #region 供外部使用的接口
-        public virtual void OnMove()
-        {
-            BattleManager.Instance.ChangeState<ActorIdleState>();
-        }
-
-        public virtual void OnNormalAttack()
-        {
-            BattleManager.Instance.ChangeState<ActorAttackState>();
-        }
-
-        public virtual void OnFinishOperation()
-        {
-            BattleManager.Instance.ChangeState<AfterTurnState>();
-        }
-
         public void AddCard(CardData cardData)
         {
             OwnedCards.Add(cardData);
@@ -79,7 +78,7 @@ namespace MyBattle
         // 刷新场上的显示
         public void Refresh()
         {
-            sceneObject.transform.position = GridMapManager.GridCoordToWorldPos(coord);
+            sceneObject.transform.position = GridMapManager.GridCoordToWorldPos(gridCoord);
         }
         #endregion
     }
