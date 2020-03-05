@@ -9,16 +9,16 @@ namespace MyBattle
     public class ActorData
     {
         public string name;
-        public Int3 gridCoord;
+        public Vector2Int coord;
         public int HP = 100;
         public int speed = 100; // 行动速度
         public List<CardData> OwnedCards { get; private set; }
         public Actor sceneObject;
 
-        public ActorData(string name, Int3 coord, int speed, Actor actor)
+        public ActorData(string name, Vector2Int coord, int speed, Actor actor)
         {
             this.name = name;
-            this.gridCoord = coord;
+            this.coord = coord;
             this.speed = speed;
             this.sceneObject = actor;
 
@@ -78,7 +78,7 @@ namespace MyBattle
         // 刷新场上的显示
         public void Refresh()
         {
-            sceneObject.transform.position = GridMapManager.GridCoordToWorldPos(gridCoord);
+            sceneObject.transform.position = GridMapManager.ActorCoordToWorldPos(coord);
         }
         #endregion
     }

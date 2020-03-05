@@ -11,4 +11,7 @@
     public const string PreMoveActor = "PreMoveActor";
     public const string DoAttackActor = "DoAttackActor";
     public const string DoFinishOperation = "DoFinishOperation";
+
+    public const string StartGenerateGridMap = "StartGenerateGridMap";
+    public const string FinishGenerateGridMap = "FinishGenerateGridMap";
 }

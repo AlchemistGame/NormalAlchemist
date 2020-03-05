@@ -12,7 +12,7 @@ namespace MyBattle
         public ActorData currentActor;
         public event UpdateEventHandler OnUpdate;
         [HideInInspector]
-        public Int3 targetCoord;
+        public Vector2Int targetCoord;
         public static BattleManager Instance { get; private set; }
         [SerializeField]
         private ActorOperationPanel actorOperationPanel;
@@ -31,13 +31,7 @@ namespace MyBattle
             EventManager.Register(EventsEnum.PreMoveActor, this, "PreMoveActor");
             EventManager.Register(EventsEnum.DoAttackActor, this, "DoAttackActor");
             EventManager.Register(EventsEnum.DoFinishOperation, this, "DoFinishOperation");
-        }
-
-        private void Start()
-        {
-            InitScene();
-
-            NextTurn();
+            EventManager.Register(EventsEnum.FinishGenerateGridMap, this, "InitScene");
         }
 
         private void Update()
@@ -47,15 +41,15 @@ namespace MyBattle
             MouseCursorEvents();
         }
 
-        private void InitScene()
+        public void InitScene()
         {
-            GridMapManager.Instance.GenerateGridMap();
-
             // 生成一个主角
-            AddActorToBattleField("CharacterModel/UnityChan", "Friend", "主角", new Int3(20, 1, 20), 50);
+            AddActorToBattleField("CharacterModel/UnityChan", "Friend", "主角", new Vector2Int(25, 5), 50);
 
             // 生成一个敌人
             //AddActorToBattleField("CharacterModel/UnityChan", "Enemy", "敌人", new Int3(5, 0, 8));
+
+            NextTurn();
         }
 
         public void NextTurn()
@@ -126,7 +120,7 @@ namespace MyBattle
             actorOperationPanel.ClearActorData();
         }
 
-        public void AddActorToBattleField(string model_path, string tag, string name, Int3 coord, int speed)
+        public void AddActorToBattleField(string model_path, string tag, string name, Vector2Int coord, int speed)
         {
             ActorData actor = ActorManager.Instance.CreateActor(model_path, tag, name, coord, speed);
             turnOrderController.AddActor(actor);

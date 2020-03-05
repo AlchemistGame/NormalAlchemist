@@ -4,7 +4,7 @@ namespace MyBattle
 {
     public class CharacterData : ActorData
     {
-        public CharacterData(string name, Int3 coord, int speed, Actor actor) : base(name, coord, speed, actor)
+        public CharacterData(string name, Vector2Int coord, int speed, Actor actor) : base(name, coord, speed, actor)
         {
 
         }
