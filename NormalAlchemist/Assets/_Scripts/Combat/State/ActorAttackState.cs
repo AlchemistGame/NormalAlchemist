@@ -7,15 +7,11 @@ namespace MyBattle
     {
         public override void Enter()
         {
-            base.Enter();
-
             BattleManager.Instance.OnUpdate += OnAttackInput;
         }
 
         public override void Exit()
         {
-            base.Exit();
-
             BattleManager.Instance.OnUpdate -= OnAttackInput;
         }
 
@@ -27,19 +23,16 @@ namespace MyBattle
                 return;
             }
 
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if (Physics.Raycast(ray, out hit, Mathf.Infinity, 1 << 9))
+            if (Input.GetMouseButtonDown(0))
             {
-                // 攻击的必须是敌人(友军无法攻击)
-                if (!BattleManager.Instance.currentActor.sceneObject.gameObject.tag.Equals(hit.collider.tag))
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                if (Physics.Raycast(ray, out RaycastHit hit))
                 {
-                    if (Input.GetMouseButtonDown(0))
+                    // 攻击的必须是敌人(友军无法攻击)
+                    Actor actor = hit.collider.GetComponent<Actor>();
+                    if (actor != null && actor.data != null && actor.data.CanBeAttackedByCurrentActor)
                     {
-                        BattleManager.Instance.currentActor.sceneObject.gameObject.transform.LookAt(hit.collider.transform);
-                        BattleManager.Instance.currentActor.sceneObject.GetComponent<Animator>().SetBool("Jab", true);
-
-                        BattleManager.Instance.ChangeState<CommandSelectionState>();
+                        actor.data.OnAttackedByOtherActor(BattleManager.Instance.ChangeState<CommandSelectionState>);
                     }
                 }
             }

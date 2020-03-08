@@ -33,16 +33,6 @@ namespace MyBattle
         {
             get
             {
-                //GameObject[] blockObjects = GameObject.FindGameObjectsWithTag("Enemy");
-                //foreach (var blockObj in blockObjects)
-                //{
-                //    if (gridCoord == CalcGridCoord(blockObj.transform.position))
-                //    {
-                //        isWalkable = false;
-                //        break;
-                //    }
-                //}
-
                 // 当前方块的上方已经存在一个方块
                 Vector3Int aboveGridCoord = gridCoord + new Vector3Int(0, 1, 0);
                 GridUnitData aboveGridUnitData = GridMapManager.GetGridUnitDataFromGridCoord(aboveGridCoord);
@@ -105,7 +95,7 @@ namespace MyBattle
                     {
                         instanceGU = Object.Instantiate(loadGU);
                         instanceGU.name = gridCoord.ToString();
-                        instanceGU.transform.parent = GridMapManager.Instance.transform;
+                        instanceGU.transform.SetParent(GridMapManager.Instance.transform);
                         instanceGU.Init(this);
                         RefreshInstance();
                     }

@@ -3,19 +3,15 @@ using UnityEngine.EventSystems;
 
 namespace MyBattle
 {
-    public class PreGenerateActorState : State
+    public class PreExecuteCardState : State
     {
         public override void Enter()
         {
-            base.Enter();
-
             BattleManager.Instance.OnUpdate += OnIdleInput;
         }
 
         public override void Exit()
         {
-            base.Exit();
-
             BattleManager.Instance.OnUpdate -= OnIdleInput;
         }
 
@@ -35,7 +31,7 @@ namespace MyBattle
                     GridUnit gu = hit.collider.GetComponent<GridUnit>();
                     if (gu != null && gu.OnTargetSelect != null)
                     {
-                        gu.OnTargetSelect(BattleManager.Instance.ChangeState<GenerateActorState>);
+                        gu.OnTargetSelect(BattleManager.Instance.ChangeState<ExecuteCardState>);
                     }
                 }
             }

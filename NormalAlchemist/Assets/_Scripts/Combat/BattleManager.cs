@@ -8,8 +8,8 @@ namespace MyBattle
     public class BattleManager : StateMachine
     {
         // 当前行动者
-        [HideInInspector]
         public ActorData currentActor;
+        public CardData currentCard;
         public event UpdateEventHandler OnUpdate;
         [HideInInspector]
         public Vector2Int targetCoord;
@@ -43,11 +43,17 @@ namespace MyBattle
 
         public void InitScene()
         {
-            // 生成一个主角
-            AddActorToBattleField("CharacterModel/UnityChan", "Friend", "主角", new Vector2Int(25, 5), 50);
+            // 生成主角
+            ActorData playerActor = ActorManager.Instance.CreateActor("CharacterModel/UnityChanPlayer", ActorCamp.friend, "主角", new Vector2Int(25, 5), 50);
+            playerActor.AddCard(new GenerateActorCardData("召唤Unity娘", "召唤一只Unity娘", playerActor,
+                "CharacterModel/UnityChanFriend", ActorCamp.friend, "被召唤者" + UnityEngine.Random.Range(0, 1000)));
+            AddActorToBattleField(playerActor);
 
-            // 生成一个敌人
-            //AddActorToBattleField("CharacterModel/UnityChan", "Enemy", "敌人", new Int3(5, 0, 8));
+            // 生成敌人
+            ActorData enemyActor = ActorManager.Instance.CreateActor("CharacterModel/UnityChanEnemy", ActorCamp.enemy, "敌人", new Vector2Int(35, 10), 30);
+            enemyActor.AddCard(new GenerateActorCardData("召唤Unity娘", "召唤一只Unity娘", enemyActor,
+                "CharacterModel/UnityChanEnemy", ActorCamp.enemy, "被召唤者" + UnityEngine.Random.Range(0, 1000)));
+            AddActorToBattleField(enemyActor);
 
             NextTurn();
         }
@@ -120,12 +126,6 @@ namespace MyBattle
             actorOperationPanel.ClearActorData();
         }
 
-        public void AddActorToBattleField(string model_path, string tag, string name, Vector2Int coord, int speed)
-        {
-            ActorData actor = ActorManager.Instance.CreateActor(model_path, tag, name, coord, speed);
-            turnOrderController.AddActor(actor);
-        }
-
         public void PreMoveActor()
         {
             ChangeState<PreMoveState>();
@@ -140,5 +140,17 @@ namespace MyBattle
         {
             ChangeState<AfterTurnState>();
         }
+
+        #region 供外部调用的接口
+        public void AddActorToBattleField(ActorData actorData)
+        {
+            turnOrderController.AddActor(actorData);
+        }
+
+        public void RemoveActorFromBattleField(ActorData actorData)
+        {
+            turnOrderController.RemoveActor(actorData);
+        }
+        #endregion
     }
 }

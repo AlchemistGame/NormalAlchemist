@@ -12,14 +12,11 @@ namespace MyBattle
 
         public override void Enter()
         {
-            base.Enter();
-
             movingNodeList = GridMapManager.Instance.GetPathFromStartToEnd(BattleManager.Instance.currentActor.coord,
                 BattleManager.Instance.targetCoord);
             if (movingNodeList.Count > 0)
             {
                 curNodePos = BattleManager.Instance.currentActor.DisplayPos;
-                BattleManager.Instance.currentActor.sceneObject.transform.LookAt(GridMapManager.GridCoordToWorldPos(movingNodeList[0].gridCoord + new Vector3Int(0, 1, 0)));
             }
 
             BattleManager.Instance.OnUpdate += OnMove;
@@ -27,9 +24,10 @@ namespace MyBattle
 
         public override void Exit()
         {
-            base.Exit();
-
             BattleManager.Instance.OnUpdate -= OnMove;
+
+            BattleManager.Instance.currentActor.coord = BattleManager.Instance.targetCoord;
+            BattleManager.Instance.currentActor.Refresh();
         }
 
         private void OnMove()
@@ -44,22 +42,15 @@ namespace MyBattle
 
                 if (toNextNodeElapsedTime >= toNextNodeTotalTime)
                 {
-                    // 一个节点走完, 规范一下位置
-                    BattleManager.Instance.currentActor.coord = new Vector2Int(movingNodeList[0].gridCoord.x, movingNodeList[0].gridCoord.z);
                     movingNodeList.RemoveAt(0);
 
                     curNodePos = BattleManager.Instance.currentActor.DisplayPos;
                     toNextNodeElapsedTime = 0;
-
-                    if (movingNodeList.Count > 0)
-                    {
-                        BattleManager.Instance.currentActor.sceneObject.transform.LookAt(GridMapManager.GridCoordToWorldPos(movingNodeList[0].gridCoord + new Vector3Int(0, 1, 0)));
-                    }
                 }
                 else
                 {
                     BattleManager.Instance.currentActor.DisplayPos = curNodePos + (toNextNodeElapsedTime / toNextNodeTotalTime) *
-                        (GridMapManager.GridCoordToWorldPos(movingNodeList[0].gridCoord + new Vector3Int(0, 1, 0)) - curNodePos);
+                        (GridMapManager.GridCoordToWorldPos(movingNodeList[0].gridCoord) - curNodePos);
                 }
             }
         }

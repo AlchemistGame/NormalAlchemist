@@ -2,24 +2,43 @@
 {
     public abstract class CardData
     {
-        public string name;
-        public string description;
+        public string cardName;
+        public string cardDescription;
         public ActorData cardOwner;
 
         public CardData(string name, string desc, ActorData owner)
         {
-            this.name = name;
-            this.description = desc;
+            this.cardName = name;
+            this.cardDescription = desc;
             this.cardOwner = owner;
         }
 
-        public void DoEffect()
+        #region 提供给外部调用的接口
+        public void SelectCurrentCard()
         {
-            OnEffect();
+            BattleManager.Instance.currentCard = this;
 
-            cardOwner.RemoveCard(this);
+            OnPreExecute();
         }
 
-        public abstract void OnEffect();
+        public void ExecuteCurrentCard()
+        {
+            OnExecute();
+        }
+
+        public void FinishExecuteCard()
+        {
+            cardOwner.RemoveCard(this);
+            BattleManager.Instance.currentCard = null;
+
+            OnAfterExecute();
+        }
+        #endregion
+
+        #region 子类需要继承实现的接口
+        public abstract void OnPreExecute();
+        public abstract void OnExecute();
+        public abstract void OnAfterExecute();
+        #endregion
     }
 }

@@ -21,18 +21,17 @@ namespace MyBattle
         }
 
         #region public 接口
-        public ActorData CreateActor(string model_path, string tag, string name, Vector2Int coord, int speed)
+        public ActorData CreateActor(string prefabPath, ActorCamp camp, string name, Vector2Int coord, int speed)
         {
-            Actor actor = Instantiate<Actor>(Resources.Load<Actor>(model_path));
-            actor.tag = tag;
-            actor.transform.SetParent(this.transform);
-
-            CharacterData characterData = new CharacterData(name, coord, speed, actor);
-            characterData.AddCard(new ActorCardData("Unity娘", "再次召唤一个Unity娘，子子孙孙无穷尽也", characterData));
-            characterData.Refresh();
+            CharacterData characterData = new CharacterData(name, camp, coord, speed, prefabPath);
+            characterData.CreateSceneObject();
             allActorDataList.Add(characterData);
-
             return characterData;
+        }
+
+        public void DestroyActor(ActorData actor)
+        {
+            allActorDataList.Remove(actor);
         }
 
         public ActorData GetActorDataFrom2DCoord(Vector2Int coord)

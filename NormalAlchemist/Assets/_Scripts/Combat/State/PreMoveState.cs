@@ -7,15 +7,11 @@ namespace MyBattle
     {
         public override void Enter()
         {
-            base.Enter();
-
             BattleManager.Instance.OnUpdate += OnIdleInput;
         }
 
         public override void Exit()
         {
-            base.Exit();
-
             BattleManager.Instance.OnUpdate -= OnIdleInput;
         }
 

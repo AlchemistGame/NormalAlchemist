@@ -7,9 +7,12 @@
     {
         public override void Enter()
         {
-            base.Enter();
-
             BattleManager.Instance.ChangeState<CommandSelectionState>();
+        }
+
+        public override void Exit()
+        {
+
         }
     }
 }

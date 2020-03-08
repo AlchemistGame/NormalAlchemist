@@ -59,8 +59,6 @@ namespace MyBattle
                 for (int i = toMove.Count - 1; i >= 0; --i)
                 {
                     TurnOrder t = toMove[i];
-                    if (toMove[i].actor.IsDead)
-                        continue;
 
                     yield return t.actor;
 

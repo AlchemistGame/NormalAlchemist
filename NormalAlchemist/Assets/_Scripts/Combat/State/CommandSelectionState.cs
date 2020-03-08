@@ -5,15 +5,11 @@
     {
         public override void Enter()
         {
-            base.Enter();
-
             BattleManager.Instance.InitActorUI();
         }
 
         public override void Exit()
         {
-            base.Exit();
-
             BattleManager.Instance.ClearActorUI();
         }
     }

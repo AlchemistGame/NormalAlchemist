@@ -10,9 +10,9 @@ public class CardItem : MonoBehaviour
 
     public void InitData(CardData cardData)
     {
-        CardName.text = cardData.name;
-        CardDescription.text = cardData.description;
+        CardName.text = cardData.cardName;
+        CardDescription.text = cardData.cardDescription;
 
-        CardItemBtn.onClick.AddListener(cardData.DoEffect);
+        CardItemBtn.onClick.AddListener(cardData.SelectCurrentCard);
     }
 }

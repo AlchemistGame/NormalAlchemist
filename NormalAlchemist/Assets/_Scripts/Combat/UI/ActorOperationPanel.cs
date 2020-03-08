@@ -8,6 +8,7 @@ public class ActorOperationPanel : MonoBehaviour
     public ScrollRect CardContainer;
     public CardItem CardPrefab;
     public Text ActorName;
+    public Text ActorHp;
     public Button MoveBtn;
     public Button NormalAttackBtn;
     public Button FinishOperationBtn;
@@ -28,6 +29,7 @@ public class ActorOperationPanel : MonoBehaviour
         NormalAttackBtn.gameObject.SetActive(false);
         FinishOperationBtn.gameObject.SetActive(false);
         ActorName.text = string.Empty;
+        ActorHp.text = string.Empty;
 
         for (int i = 0; i < cardItemList.Count; i++)
         {
@@ -48,6 +50,7 @@ public class ActorOperationPanel : MonoBehaviour
         NormalAttackBtn.gameObject.SetActive(true);
         FinishOperationBtn.gameObject.SetActive(true);
         ActorName.text = actorData.name;
+        ActorHp.text = "HP:" + actorData.HP;
     }
 
     private void GenerateCards(List<CardData> cardDataList)

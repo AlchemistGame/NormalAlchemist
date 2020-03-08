@@ -17,6 +17,7 @@ namespace MyBattle
     /// </summary>
     public class GridMapManager : MonoBehaviour
     {
+        [HideInInspector]
         public int seed;                                            // 随机种子
         public const float gridUnitWidth = 1;
         public const float gridUnitDepth = 1;
@@ -153,8 +154,8 @@ namespace MyBattle
 
         public List<GridUnitData> GetPathFromStartToEnd(Vector2Int startCoord, Vector2Int endCoord)
         {
-            GridUnitData startNode = GetGridUnitDataFrom2DCoord(startCoord);
-            GridUnitData endNode = GetGridUnitDataFrom2DCoord(endCoord);
+            GridUnitData startNode = GetTopGridUnitDataFrom2DCoord(startCoord);
+            GridUnitData endNode = GetTopGridUnitDataFrom2DCoord(endCoord);
             return PathFinder.RequestPathfind(startNode, endNode);
         }
 
@@ -175,7 +176,7 @@ namespace MyBattle
             return new Vector3(x, y, z);
         }
 
-        public static GridUnitData GetGridUnitDataFrom2DCoord(Vector2Int coord)
+        public static GridUnitData GetTopGridUnitDataFrom2DCoord(Vector2Int coord)
         {
             GridUnitData retVal = null;
 
@@ -191,19 +192,13 @@ namespace MyBattle
             return retVal;
         }
 
-        public static Vector3Int ActorCoordToGridCoord(Vector2Int actorCoord)
-        {
-            GridUnitData retVal = GetGridUnitDataFrom2DCoord(actorCoord);
-
-            return retVal.gridCoord + new Vector3Int(0, 1, 0);
-        }
-
+        // 获取脚下方块顶部面中心的位置
         public static Vector3 ActorCoordToWorldPos(Vector2Int actorCoord)
         {
-            Vector3Int gridCoord = ActorCoordToGridCoord(actorCoord);
-            float x = gridMapOriginPos.x + gridCoord.x * gridUnitWidth;
-            float y = gridMapOriginPos.y + gridCoord.y * gridUnitDepth;
-            float z = gridMapOriginPos.z + gridCoord.z * gridUnitHeight;
+            GridUnitData gu = GetTopGridUnitDataFrom2DCoord(actorCoord);
+            float x = gridMapOriginPos.x + gu.gridCoord.x * gridUnitWidth;
+            float y = gridMapOriginPos.y + gu.gridCoord.y * gridUnitDepth;
+            float z = gridMapOriginPos.z + gu.gridCoord.z * gridUnitHeight;
             return new Vector3(x, y, z);
         }
 
