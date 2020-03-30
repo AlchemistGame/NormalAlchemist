@@ -1,7 +1,6 @@
-﻿using UnityEngine;
+﻿using Crosstales.FB.EditorUtil;
 using UnityEditor;
-using Crosstales.FB.EditorUtil;
-using Crosstales.FB.EditorTask;
+using UnityEngine;
 
 namespace Crosstales.FB.EditorIntegration
 {
@@ -10,10 +9,6 @@ namespace Crosstales.FB.EditorIntegration
     {
 
         #region Variables
-
-        private static string updateText = UpdateCheck.TEXT_NOT_CHECKED;
-        private static UpdateStatus updateStatus = UpdateStatus.NOT_CHECKED;
-
         private System.Threading.Thread worker;
 
         private Vector2 scrollPosConfig;
@@ -145,242 +140,242 @@ namespace Crosstales.FB.EditorIntegration
             GUILayout.Space(6);
         }
 
-        protected void showAbout()
-        {
-            EditorHelper.BannerFB();
+        //protected void showAbout()
+        //{
+        //    EditorHelper.BannerFB();
 
-            GUILayout.Space(3);
-            GUILayout.Label(Util.Constants.ASSET_NAME, EditorStyles.boldLabel);
+        //    GUILayout.Space(3);
+        //    GUILayout.Label(Util.Constants.ASSET_NAME, EditorStyles.boldLabel);
 
-            GUILayout.BeginHorizontal();
-            {
-                GUILayout.BeginVertical(GUILayout.Width(60));
-                {
-                    GUILayout.Label("Version:");
+        //    GUILayout.BeginHorizontal();
+        //    {
+        //        GUILayout.BeginVertical(GUILayout.Width(60));
+        //        {
+        //            GUILayout.Label("Version:");
 
-                    GUILayout.Space(12);
+        //            GUILayout.Space(12);
 
-                    GUILayout.Label("Web:");
+        //            GUILayout.Label("Web:");
 
-                    GUILayout.Space(2);
+        //            GUILayout.Space(2);
 
-                    GUILayout.Label("Email:");
+        //            GUILayout.Label("Email:");
 
-                }
-                GUILayout.EndVertical();
+        //        }
+        //        GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(GUILayout.Width(170));
-                {
-                    GUILayout.Space(0);
+        //        GUILayout.BeginVertical(GUILayout.Width(170));
+        //        {
+        //            GUILayout.Space(0);
 
-                    GUILayout.Label(Util.Constants.ASSET_VERSION);
+        //            GUILayout.Label(Util.Constants.ASSET_VERSION);
 
-                    GUILayout.Space(12);
+        //            GUILayout.Space(12);
 
-                    EditorGUILayout.SelectableLabel(Util.Constants.ASSET_AUTHOR_URL, GUILayout.Height(16), GUILayout.ExpandHeight(false));
+        //            EditorGUILayout.SelectableLabel(Util.Constants.ASSET_AUTHOR_URL, GUILayout.Height(16), GUILayout.ExpandHeight(false));
 
-                    GUILayout.Space(2);
+        //            GUILayout.Space(2);
 
-                    EditorGUILayout.SelectableLabel(Util.Constants.ASSET_CONTACT, GUILayout.Height(16), GUILayout.ExpandHeight(false));
-                }
-                GUILayout.EndVertical();
+        //            EditorGUILayout.SelectableLabel(Util.Constants.ASSET_CONTACT, GUILayout.Height(16), GUILayout.ExpandHeight(false));
+        //        }
+        //        GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
-                {
-                    //GUILayout.Space(0);
-                }
-                GUILayout.EndVertical();
+        //        GUILayout.BeginVertical(GUILayout.ExpandWidth(true));
+        //        {
+        //            //GUILayout.Space(0);
+        //        }
+        //        GUILayout.EndVertical();
 
-                GUILayout.BeginVertical(GUILayout.Width(64));
-                {
-                    if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Logo_Asset, "Visit asset website")))
-                    {
-                        Application.OpenURL(EditorConstants.ASSET_URL);
-                    }
+        //        GUILayout.BeginVertical(GUILayout.Width(64));
+        //        {
+        //            if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Logo_Asset, "Visit asset website")))
+        //            {
+        //                Application.OpenURL(EditorConstants.ASSET_URL);
+        //            }
 
-                    if (!Util.Constants.isPro)
-                    {
-                        if (GUILayout.Button(new GUIContent(" Upgrade", "Upgrade " + Util.Constants.ASSET_NAME + " to the PRO-version")))
-                        {
-                            Application.OpenURL(Util.Constants.ASSET_PRO_URL);
-                        }
-                    }
-                }
-                GUILayout.EndVertical();
-            }
-            GUILayout.EndHorizontal();
+        //            if (!Util.Constants.isPro)
+        //            {
+        //                if (GUILayout.Button(new GUIContent(" Upgrade", "Upgrade " + Util.Constants.ASSET_NAME + " to the PRO-version")))
+        //                {
+        //                    Application.OpenURL(Util.Constants.ASSET_PRO_URL);
+        //                }
+        //            }
+        //        }
+        //        GUILayout.EndVertical();
+        //    }
+        //    GUILayout.EndHorizontal();
 
-            GUILayout.Label("© 2017-2019 by " + Util.Constants.ASSET_AUTHOR);
+        //    GUILayout.Label("© 2017-2019 by " + Util.Constants.ASSET_AUTHOR);
 
-            EditorHelper.SeparatorUI();
+        //    EditorHelper.SeparatorUI();
 
-            GUILayout.BeginHorizontal();
-            {
-                if (GUILayout.Button(new GUIContent(" AssetStore", EditorHelper.Logo_Unity, "Visit the 'Unity AssetStore' website.")))
-                {
-                    Application.OpenURL(Util.Constants.ASSET_CT_URL);
-                }
+        //    GUILayout.BeginHorizontal();
+        //    {
+        //        if (GUILayout.Button(new GUIContent(" AssetStore", EditorHelper.Logo_Unity, "Visit the 'Unity AssetStore' website.")))
+        //        {
+        //            Application.OpenURL(Util.Constants.ASSET_CT_URL);
+        //        }
 
-                if (GUILayout.Button(new GUIContent(" " + Util.Constants.ASSET_AUTHOR, EditorHelper.Logo_CT, "Visit the '" + Util.Constants.ASSET_AUTHOR + "' website.")))
-                {
-                    Application.OpenURL(Util.Constants.ASSET_AUTHOR_URL);
-                }
-            }
-            GUILayout.EndHorizontal();
+        //        if (GUILayout.Button(new GUIContent(" " + Util.Constants.ASSET_AUTHOR, EditorHelper.Logo_CT, "Visit the '" + Util.Constants.ASSET_AUTHOR + "' website.")))
+        //        {
+        //            Application.OpenURL(Util.Constants.ASSET_AUTHOR_URL);
+        //        }
+        //    }
+        //    GUILayout.EndHorizontal();
 
-            EditorHelper.SeparatorUI();
+        //    EditorHelper.SeparatorUI();
 
-            aboutTab = GUILayout.Toolbar(aboutTab, new string[] { "Readme", "Versions", "Update" });
+        //    aboutTab = GUILayout.Toolbar(aboutTab, new string[] { "Readme", "Versions", "Update" });
 
-            if (aboutTab == 2)
-            {
-                scrollPosAboutUpdate = EditorGUILayout.BeginScrollView(scrollPosAboutUpdate, false, false);
-                {
-                    Color fgColor = GUI.color;
+        //    if (aboutTab == 2)
+        //    {
+        //        scrollPosAboutUpdate = EditorGUILayout.BeginScrollView(scrollPosAboutUpdate, false, false);
+        //        {
+        //            Color fgColor = GUI.color;
 
-                    GUI.color = Color.yellow;
+        //            GUI.color = Color.yellow;
 
-                    if (updateStatus == UpdateStatus.NO_UPDATE)
-                    {
-                        GUI.color = Color.green;
-                        GUILayout.Label(updateText);
-                    }
-                    else if (updateStatus == UpdateStatus.UPDATE)
-                    {
-                        GUILayout.Label(updateText);
+        //            if (updateStatus == UpdateStatus.NO_UPDATE)
+        //            {
+        //                GUI.color = Color.green;
+        //                GUILayout.Label(updateText);
+        //            }
+        //            else if (updateStatus == UpdateStatus.UPDATE)
+        //            {
+        //                GUILayout.Label(updateText);
 
-                        if (GUILayout.Button(new GUIContent(" Download", "Visit the 'Unity AssetStore' to download the latest version.")))
-                        {
-                            //Application.OpenURL(Constants.ASSET_URL);
-                            UnityEditorInternal.AssetStore.Open("content/" + EditorConstants.ASSET_ID);
-                        }
-                    }
-                    else if (updateStatus == UpdateStatus.UPDATE_PRO)
-                    {
-                        GUILayout.Label(updateText);
+        //                if (GUILayout.Button(new GUIContent(" Download", "Visit the 'Unity AssetStore' to download the latest version.")))
+        //                {
+        //                    //Application.OpenURL(Constants.ASSET_URL);
+        //                    UnityEditorInternal.AssetStore.Open("content/" + EditorConstants.ASSET_ID);
+        //                }
+        //            }
+        //            else if (updateStatus == UpdateStatus.UPDATE_PRO)
+        //            {
+        //                GUILayout.Label(updateText);
 
-                        if (GUILayout.Button(new GUIContent(" Upgrade", "Upgrade to the PRO-version in the 'Unity AssetStore'.")))
-                        {
-                            Application.OpenURL(Util.Constants.ASSET_PRO_URL);
-                        }
-                    }
-                    else if (updateStatus == UpdateStatus.UPDATE_VERSION)
-                    {
-                        GUILayout.Label(updateText);
+        //                if (GUILayout.Button(new GUIContent(" Upgrade", "Upgrade to the PRO-version in the 'Unity AssetStore'.")))
+        //                {
+        //                    Application.OpenURL(Util.Constants.ASSET_PRO_URL);
+        //                }
+        //            }
+        //            else if (updateStatus == UpdateStatus.UPDATE_VERSION)
+        //            {
+        //                GUILayout.Label(updateText);
 
-                        if (GUILayout.Button(new GUIContent(" Upgrade", "Upgrade to the newer version in the 'Unity AssetStore'")))
-                        {
-                            Application.OpenURL(Util.Constants.ASSET_CT_URL);
-                        }
-                    }
-                    else if (updateStatus == UpdateStatus.DEPRECATED)
-                    {
-                        GUILayout.Label(updateText);
+        //                if (GUILayout.Button(new GUIContent(" Upgrade", "Upgrade to the newer version in the 'Unity AssetStore'")))
+        //                {
+        //                    Application.OpenURL(Util.Constants.ASSET_CT_URL);
+        //                }
+        //            }
+        //            else if (updateStatus == UpdateStatus.DEPRECATED)
+        //            {
+        //                GUILayout.Label(updateText);
 
-                        if (GUILayout.Button(new GUIContent(" More Information", "Visit the 'crosstales'-site for more information.")))
-                        {
-                            Application.OpenURL(Util.Constants.ASSET_AUTHOR_URL);
-                        }
-                    }
-                    else
-                    {
-                        GUI.color = Color.cyan;
-                        GUILayout.Label(updateText);
-                    }
+        //                if (GUILayout.Button(new GUIContent(" More Information", "Visit the 'crosstales'-site for more information.")))
+        //                {
+        //                    Application.OpenURL(Util.Constants.ASSET_AUTHOR_URL);
+        //                }
+        //            }
+        //            else
+        //            {
+        //                GUI.color = Color.cyan;
+        //                GUILayout.Label(updateText);
+        //            }
 
-                    GUI.color = fgColor;
-                }
-                EditorGUILayout.EndScrollView();
+        //            GUI.color = fgColor;
+        //        }
+        //        EditorGUILayout.EndScrollView();
 
-                if (updateStatus == UpdateStatus.NOT_CHECKED || updateStatus == UpdateStatus.NO_UPDATE)
-                {
-                    bool isChecking = !(worker == null || (worker != null && !worker.IsAlive));
+        //        if (updateStatus == UpdateStatus.NOT_CHECKED || updateStatus == UpdateStatus.NO_UPDATE)
+        //        {
+        //            bool isChecking = !(worker == null || (worker != null && !worker.IsAlive));
 
-                    GUI.enabled = Util.Helper.isInternetAvailable && !isChecking;
+        //            GUI.enabled = Util.Helper.isInternetAvailable && !isChecking;
 
-                    if (GUILayout.Button(new GUIContent(isChecking ? "Checking... Please wait." : " Check For Update", EditorHelper.Icon_Check, "Checks for available updates of " + Util.Constants.ASSET_NAME)))
-                    {
-                        worker = new System.Threading.Thread(() => UpdateCheck.UpdateCheckForEditor(out updateText, out updateStatus));
-                        worker.Start();
-                    }
+        //            if (GUILayout.Button(new GUIContent(isChecking ? "Checking... Please wait." : " Check For Update", EditorHelper.Icon_Check, "Checks for available updates of " + Util.Constants.ASSET_NAME)))
+        //            {
+        //                worker = new System.Threading.Thread(() => UpdateCheck.UpdateCheckForEditor(out updateText, out updateStatus));
+        //                worker.Start();
+        //            }
 
-                    GUI.enabled = true;
-                }
-            }
-            else if (aboutTab == 0)
-            {
-                if (readme == null)
-                {
-                    string path = Application.dataPath + EditorConfig.ASSET_PATH + "README.txt";
+        //            GUI.enabled = true;
+        //        }
+        //    }
+        //    else if (aboutTab == 0)
+        //    {
+        //        if (readme == null)
+        //        {
+        //            string path = Application.dataPath + EditorConfig.ASSET_PATH + "README.txt";
 
-                    try
-                    {
-                        readme = System.IO.File.ReadAllText(path);
-                    }
-                    catch (System.Exception)
-                    {
-                        readme = "README not found: " + path;
-                    }
-                }
+        //            try
+        //            {
+        //                readme = System.IO.File.ReadAllText(path);
+        //            }
+        //            catch (System.Exception)
+        //            {
+        //                readme = "README not found: " + path;
+        //            }
+        //        }
 
-                scrollPosAboutReadme = EditorGUILayout.BeginScrollView(scrollPosAboutReadme, false, false);
-                {
-                    GUILayout.Label(readme);
-                }
-                EditorGUILayout.EndScrollView();
-            }
-            else
-            {
-                if (versions == null)
-                {
-                    string path = Application.dataPath + EditorConfig.ASSET_PATH + "Documentation/VERSIONS.txt";
+        //        scrollPosAboutReadme = EditorGUILayout.BeginScrollView(scrollPosAboutReadme, false, false);
+        //        {
+        //            GUILayout.Label(readme);
+        //        }
+        //        EditorGUILayout.EndScrollView();
+        //    }
+        //    else
+        //    {
+        //        if (versions == null)
+        //        {
+        //            string path = Application.dataPath + EditorConfig.ASSET_PATH + "Documentation/VERSIONS.txt";
 
-                    try
-                    {
-                        versions = System.IO.File.ReadAllText(path);
-                    }
-                    catch (System.Exception)
-                    {
-                        versions = "VERSIONS not found: " + path;
-                    }
-                }
+        //            try
+        //            {
+        //                versions = System.IO.File.ReadAllText(path);
+        //            }
+        //            catch (System.Exception)
+        //            {
+        //                versions = "VERSIONS not found: " + path;
+        //            }
+        //        }
 
-                scrollPosAboutVersions = EditorGUILayout.BeginScrollView(scrollPosAboutVersions, false, false);
-                {
-                    GUILayout.Label(versions);
-                }
+        //        scrollPosAboutVersions = EditorGUILayout.BeginScrollView(scrollPosAboutVersions, false, false);
+        //        {
+        //            GUILayout.Label(versions);
+        //        }
 
-                EditorGUILayout.EndScrollView();
-            }
+        //        EditorGUILayout.EndScrollView();
+        //    }
 
-            EditorHelper.SeparatorUI();
+        //    EditorHelper.SeparatorUI();
 
-            GUILayout.BeginHorizontal();
-            {
-                if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Discord, "Communicate with us via 'Discord'.")))
-                {
-                    Application.OpenURL(Util.Constants.ASSET_SOCIAL_DISCORD);
-                }
+        //    GUILayout.BeginHorizontal();
+        //    {
+        //        if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Discord, "Communicate with us via 'Discord'.")))
+        //        {
+        //            Application.OpenURL(Util.Constants.ASSET_SOCIAL_DISCORD);
+        //        }
 
-                if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Facebook, "Follow us on 'Facebook'.")))
-                {
-                    Application.OpenURL(Util.Constants.ASSET_SOCIAL_FACEBOOK);
-                }
+        //        if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Facebook, "Follow us on 'Facebook'.")))
+        //        {
+        //            Application.OpenURL(Util.Constants.ASSET_SOCIAL_FACEBOOK);
+        //        }
 
-                if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Twitter, "Follow us on 'Twitter'.")))
-                {
-                    Application.OpenURL(Util.Constants.ASSET_SOCIAL_TWITTER);
-                }
+        //        if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Twitter, "Follow us on 'Twitter'.")))
+        //        {
+        //            Application.OpenURL(Util.Constants.ASSET_SOCIAL_TWITTER);
+        //        }
 
-                if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Linkedin, "Follow us on 'LinkedIn'.")))
-                {
-                    Application.OpenURL(Util.Constants.ASSET_SOCIAL_LINKEDIN);
-                }
-            }
-            GUILayout.EndHorizontal();
+        //        if (GUILayout.Button(new GUIContent(string.Empty, EditorHelper.Social_Linkedin, "Follow us on 'LinkedIn'.")))
+        //        {
+        //            Application.OpenURL(Util.Constants.ASSET_SOCIAL_LINKEDIN);
+        //        }
+        //    }
+        //    GUILayout.EndHorizontal();
 
-            GUILayout.Space(6);
-        }
+        //    GUILayout.Space(6);
+        //}
 
         protected static void save()
         {

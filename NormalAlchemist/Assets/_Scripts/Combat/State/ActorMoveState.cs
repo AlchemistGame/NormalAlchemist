@@ -1,73 +1,57 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-public class ActorMoveState : State
+namespace MyBattle
 {
-    private List<Vector3> movingPath;           // 包含了正在移动的所有目标点
-    private float toNextNodeTotalTime = 0;      // 从当前位置到下个目标点所需经历总时长
-    private float toNextNodeElapsedTime = 0;    // 已经过的时长
-    private Vector3 curNodePos;                 // 玩家所处当前节点的坐标
-    private float moveSpeed = 3f;
-    private GameObject sceneObject
+    public class ActorMoveState : State
     {
-        get
+        private List<GridUnitData> movingNodeList;           // 包含了正在移动的所有目标点
+        private float toNextNodeTotalTime = 0.5f;     // 从当前位置到下个目标点所需经历总时长
+        private float toNextNodeElapsedTime = 0;    // 已经过的时长
+        private Vector3 curNodePos;                 // 玩家所处当前节点的坐标
+
+        public override void Enter()
         {
-            return ActorManager.Instance.currentActor.gameObject;
-        }
-    }
-
-    public override void Enter()
-    {
-        base.Enter();
-
-        ActorManager.Instance.currentActor.GetComponent<Animator>().SetBool("Run", true);
-
-        movingPath = Pathfinding.GridManager.Instance.GetPathFromStartToEnd(sceneObject.transform.position, ActorManager.Instance.targetPosition);
-        if (movingPath.Count > 0)
-        {
-            toNextNodeTotalTime = (movingPath[0] - sceneObject.transform.position).magnitude / moveSpeed;
-            curNodePos = sceneObject.transform.position;
-            sceneObject.transform.LookAt(movingPath[0]);
-        }
-
-        ActorManager.Instance.OnUpdate += OnMove;
-    }
-
-    public override void Exit()
-    {
-        base.Exit();
-
-        ActorManager.Instance.OnUpdate -= OnMove;
-
-        ActorManager.Instance.selectedBlockGO.GetComponent<Renderer>().enabled = false;
-    }
-
-    private void OnMove()
-    {
-        if (movingPath == null || movingPath.Count <= 0)
-        {
-            ActorManager.Instance.ChangeState<CommandSelectionState>();
-        }
-        else
-        {
-            toNextNodeElapsedTime += Time.deltaTime;
-
-            if (toNextNodeElapsedTime >= toNextNodeTotalTime)
+            movingNodeList = GridMapManager.Instance.GetPathFromStartToEnd(BattleManager.Instance.currentActor.coord,
+                BattleManager.Instance.targetCoord);
+            if (movingNodeList.Count > 0)
             {
-                sceneObject.transform.position = movingPath[0];
-                curNodePos = sceneObject.transform.position;
-                movingPath.RemoveAt(0);
-                toNextNodeElapsedTime = 0;
+                curNodePos = BattleManager.Instance.currentActor.DisplayPos;
+            }
 
-                if (movingPath.Count > 0)
-                {
-                    toNextNodeTotalTime = (movingPath[0] - sceneObject.transform.position).magnitude / moveSpeed;
-                    sceneObject.transform.LookAt(movingPath[0]);
-                }
+            BattleManager.Instance.OnUpdate += OnMove;
+        }
+
+        public override void Exit()
+        {
+            BattleManager.Instance.OnUpdate -= OnMove;
+
+            BattleManager.Instance.currentActor.coord = BattleManager.Instance.targetCoord;
+            BattleManager.Instance.currentActor.Refresh();
+        }
+
+        private void OnMove()
+        {
+            if (movingNodeList == null || movingNodeList.Count <= 0)
+            {
+                BattleManager.Instance.ChangeState<CommandSelectionState>();
             }
             else
             {
-                sceneObject.transform.position = curNodePos + (toNextNodeElapsedTime / toNextNodeTotalTime) * (movingPath[0] - curNodePos);
+                toNextNodeElapsedTime += Time.deltaTime;
+
+                if (toNextNodeElapsedTime >= toNextNodeTotalTime)
+                {
+                    movingNodeList.RemoveAt(0);
+
+                    curNodePos = BattleManager.Instance.currentActor.DisplayPos;
+                    toNextNodeElapsedTime = 0;
+                }
+                else
+                {
+                    BattleManager.Instance.currentActor.DisplayPos = curNodePos + (toNextNodeElapsedTime / toNextNodeTotalTime) *
+                        (GridMapManager.GridCoordToWorldPos(movingNodeList[0].gridCoord) - curNodePos);
+                }
             }
         }
     }

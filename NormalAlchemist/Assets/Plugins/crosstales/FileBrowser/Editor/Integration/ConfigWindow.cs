@@ -1,6 +1,6 @@
-﻿using UnityEditor;
+﻿using Crosstales.FB.EditorUtil;
+using UnityEditor;
 using UnityEngine;
-using Crosstales.FB.EditorUtil;
 
 namespace Crosstales.FB.EditorIntegration
 {
@@ -85,14 +85,14 @@ namespace Crosstales.FB.EditorIntegration
 
                 GUILayout.Space(6);
             }
-            else if (tab == 1)
-            {
-                showHelp();
-            }
-            else
-            {
-                showAbout();
-            }
+            //else if (tab == 1)
+            //{
+            //    showHelp();
+            //}
+            //else
+            //{
+            //    showAbout();
+            //}
         }
 
         public void OnInspectorUpdate()

@@ -23,7 +23,11 @@ public class EventManager
             MethodInfo methodInfo = target.GetType().GetMethod(methodName);
             List<sTypeMethod> ls_TypeMethod;
 
-            if (methodInfo != null)
+            if (methodInfo == null)
+            {
+                Debug.LogError("can't find specified method");
+            }
+            else
             {
                 if (dict_FireMethod.TryGetValue(registEvent, out ls_TypeMethod))
                 {

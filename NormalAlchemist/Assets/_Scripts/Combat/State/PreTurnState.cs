@@ -1,12 +1,18 @@
-﻿/// <summary>
-/// 回合前的准备工作
-/// </summary>
-public class PreTurnState : State
+﻿namespace MyBattle
 {
-    public override void Enter()
+    /// <summary>
+    /// 回合前的准备工作
+    /// </summary>
+    public class PreTurnState : State
     {
-        base.Enter();
+        public override void Enter()
+        {
+            BattleManager.Instance.ChangeState<CommandSelectionState>();
+        }
 
-        ActorManager.Instance.ChangeState<CommandSelectionState>();
+        public override void Exit()
+        {
+
+        }
     }
 }

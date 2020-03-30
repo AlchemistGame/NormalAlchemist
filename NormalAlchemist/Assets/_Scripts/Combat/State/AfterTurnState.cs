@@ -1,12 +1,18 @@
-﻿/// <summary>
-/// 回合结束后的善后工作
-/// </summary>
-public class AfterTurnState : State
+﻿namespace MyBattle
 {
-    public override void Enter()
+    /// <summary>
+    /// 回合结束后的善后工作
+    /// </summary>
+    public class AfterTurnState : State
     {
-        base.Enter();
+        public override void Enter()
+        {
+            BattleManager.Instance.NextTurn();
+        }
 
-        ActorManager.Instance.NextTurn();
+        public override void Exit()
+        {
+
+        }
     }
 }

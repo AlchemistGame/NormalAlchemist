@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 
-public class GlobalMapEditor
+public class GlobalSettings
 {
+    public static int MapSideLength = 1024;
     public static int mapObjectCount = 0;
     public static int UndoSession = 0;
     public static string RootMapDir = Application.streamingAssetsPath + "/Maps/";
