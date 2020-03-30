@@ -1,0 +1,38 @@
+    public class {ConfigName} : IConfig
+    {
+        public static Table<{ConfigName}> ConfigTable = new Table<{ConfigName}>();
+        public {propertyType[0]} {propertyName[0]};
+        public {propertyType[1]} {propertyName[1]};
+        {propertyList}
+
+        public void BuildConfig(uint id)
+        {
+            {ConfigName} cfg = new {ConfigName}();
+            int idx = ConfigTable.IdToIndex(id);
+            if (idx == -1)
+            {
+                ConfigTable.configCache[id] = null;
+                return;
+            }
+            object temp;
+            cfg.{propertyName[0]} =  (temp = ConfigTable.TryGetColDataFromPool("{propertyName[0]}", idx)) == null ? {propertyDefault[0]} : (propertyType[0])temp;
+            cfg.id =  (temp = ConfigTable.TryGetColDataFromPool("id", idx)) == null ? 0 : (uint)temp;
+            cfg.atk = (temp = ConfigTable.TryGetColDataFromPool("atk", idx)) == null ? 0 : (int)temp;
+
+            ConfigTable.configCache[id] = cfg;
+        }
+
+        public IConfig GetConfig(uint id)
+        {
+            if (!ConfigTable.configCache.ContainsKey(id))
+            {
+                BuildConfig(id);
+            }
+            return ConfigTable.configCache[id];
+        }
+
+        public void LoadTable(IReader reader)
+        {
+            ConfigTable.InitTable(reader);
+        }
+    }

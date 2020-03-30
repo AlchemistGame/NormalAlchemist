@@ -1,0 +1,32 @@
+    public class {0} : IConfig
+    {{
+        public static Table<{0}> ConfigTable = new Table<{0}>();
+        {1}
+        public void BuildConfig(uint id)
+        {{
+            {0} cfg = new {0}();
+            int idx = ConfigTable.IdToIndex(id);
+            if (idx == -1)
+            {{
+                ConfigTable.configCache[id] = null;
+                return;
+            }}
+            object temp;
+            {2}
+            ConfigTable.configCache[id] = cfg;
+        }}
+
+        public IConfig GetConfig(uint id)
+        {{
+            if (!ConfigTable.configCache.ContainsKey(id))
+            {{
+                BuildConfig(id);
+            }}
+            return ConfigTable.configCache[id];
+        }}
+
+        public void LoadTable(IReader reader)
+        {{
+            ConfigTable.InitTable(reader);
+        }}
+    }}

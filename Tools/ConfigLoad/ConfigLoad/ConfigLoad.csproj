@@ -56,6 +56,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGenerationMain.cs" />
+    <Compile Include="CommonClass\ConfigLoader.cs" />
+    <Compile Include="CommonClass\ConfigTemplate.cs" />
+    <Compile Include="CommonClass\Table.cs" />
     <Compile Include="ConfigLoad.cs">
       <SubType>Form</SubType>
     </Compile>

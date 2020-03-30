@@ -1,6 +1,6 @@
 namespace DefineEnum
 {
-    publice enum ABILLITY
+    public enum ABILLITY
     {
         NULL = 0,
         STR = 1,

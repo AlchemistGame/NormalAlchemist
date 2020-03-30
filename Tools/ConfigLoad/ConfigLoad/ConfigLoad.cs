@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.CSharp;
+using System;
+using System.CodeDom.Compiler;
 using System.Windows.Forms;
 namespace ConfigLoad
 {
@@ -77,13 +72,67 @@ namespace ConfigLoad
             {
                 excel = new LoadExcel();
             }
-            excel.LoadGeneralCodeDataFromFile(folderPath);
+            LoadExcel.Instance.LoadGeneralCodeDataFromFile(folderPath);
+            string str = codeGeneration.LoadTemplate(folderPath + "\\ConfigDataTemplate.txt");
+            // cfg.{propertyName[0]} =  (temp = ConfigTable.TryGetColDataFromPool("{propertyName[0]}", idx)) == null ? {propertyDefault[0]} : (propertyType[0])temp;
+            // public {propertyType[0]} {propertyName[0]};
+            string configName = "test";
+            string buildStr = string.Format(str, configName);
+            Console.Write(buildStr);
             codeGeneration.GeneralCodeEnumFromDict(excel.EnumDict);
             codeGeneration.GeneralCodeStructFromDict(excel.StructDict);
             codeGeneration.GeneralCodeFromDict(excel.GeneralCodeData,excel.dict_ConfigIdNick);
+
             codeGeneration.WriteResultToCs(folderPath + "\\StructDefine.cs", codeGeneration.StructGenerationResult);
             codeGeneration.WriteResultToCs(folderPath+"\\ConfigDefine.cs", codeGeneration.CodeGenerationResult);
             codeGeneration.WriteResultToCs(folderPath + "\\EnumDefine.cs", codeGeneration.EnumGenerationResult);
+            codeGeneration.WriteResultToProtoc(folderPath + "\\EnumDefine.proto", codeGeneration.EnumGenerationResultProto);
+            //codeGeneration.WriteResultToProtoc(folderPath + "\\ConfigDefine.proto", codeGeneration.EnumGenerationResultProto);
+            codeGeneration.WriteResultToProtoc(folderPath + "\\StructDefine.proto", codeGeneration.StructGenerationResultProto);
+            string protocCmd = ".\\protoc --proto_path={0} --csharp_out=.\\ {1}.proto";
+            string buildedCmd = string.Format(protocCmd, folderPath+ "\\TestOutput", "EnumDefine");
+            string buildedCmd2 = string.Format(protocCmd, folderPath + "\\TestOutput", "StructDefine");
+            string retrunInfo =  ProtoGeneration.RunProtocEXE(buildedCmd);
+            string retrunInfo2 = ProtoGeneration.RunProtocEXE(buildedCmd2);
+            string[] codeList = new string[] { codeGeneration.EnumGenerationResult, codeGeneration.StructGenerationResult,codeGeneration.CodeGenerationResult };
+            CompilerResults info = DebugRun(codeList, folderPath+ "\\ConfigLoad.dll");//+"\\EnumDefine.dll"
+            System.Reflection.Assembly assembly = info.CompiledAssembly;
+
+
+
+
+            Console.WriteLine(info.Output);
         }
+
+        /// <summary>
+        /// 动态编译并执行代码
+        /// </summary>
+        /// <param name="codelist">代码</param>
+        /// <returns>返回输出内容</returns>
+        public CompilerResults DebugRun(string[] codelist, string newPath)
+        {
+            CSharpCodeProvider complier = new CSharpCodeProvider();
+            //设置编译参数
+            CompilerParameters paras = new CompilerParameters();
+            //引入第三方dll
+            paras.ReferencedAssemblies.Add(@"System.dll");
+            paras.ReferencedAssemblies.Add(@"System.configuration.dll");
+            paras.ReferencedAssemblies.Add(@"System.Data.dll");
+            paras.ReferencedAssemblies.Add(@"System.Management.dll");
+            //引入自定义dll
+            //paras.ReferencedAssemblies.Add(@"D:\自定义方法\自定义方法\bin\LogHelper.dll");
+            //是否内存中生成输出
+            paras.GenerateInMemory = false;
+            //是否生成可执行文件
+            paras.GenerateExecutable = false;
+            paras.OutputAssembly = newPath;
+
+            //编译代码
+            CompilerResults result = complier.CompileAssemblyFromSource(paras, codelist);
+
+            return result;
+        }
+
+
     }
 }

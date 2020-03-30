@@ -1,0 +1,9 @@
+syntax = "proto3";
+option csharp_namespace = "ConfigLoad";
+message DefineStruct {
+  Struct ManaUseLevel
+  {
+        public int32 lv = 1;
+        public int32 manaUsage = 2;
+  }
+}
